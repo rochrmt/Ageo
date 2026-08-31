@@ -76,3 +76,10 @@ ecosystem.config.js
 start-ageo.vbs
 Cmd demarrage auto.txt
 Probleme Sql Server.txt
+
+# ─── Scripts batch Windows (déploiement local) ──────────────
+*.bat
+
+# ─── Frontend compilé (sera reconstruit par Docker) ─────────
+client/assets/
+client/dist/
