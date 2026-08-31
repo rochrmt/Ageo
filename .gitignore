@@ -83,3 +83,11 @@ Probleme Sql Server.txt
 # ─── Frontend compilé (sera reconstruit par Docker) ─────────
 client/assets/
 client/dist/
+
+# ─── Fichiers racine inutiles ───────────────────────────────
+/package.json
+/package-lock.json
+
+# ─── Tests et scripts locaux ────────────────────────────────
+server/test-rapports.js
+server/scripts/backup-db.ps1
