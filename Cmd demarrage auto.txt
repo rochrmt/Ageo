@@ -1,4 +1,0 @@
-echo Set ws = CreateObject("WScript.Shell") > C:\AGEO\start-ageo.vbs
-echo ws.Run """C:\Program Files\nodejs\node.exe"" ""C:\AGEO\server\index.js""", 0, False >> C:\AGEO\start-ageo.vbs
-
-reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "AGEO" /t REG_SZ /d "wscript.exe \"C:\AGEO\start-ageo.vbs\"" /f

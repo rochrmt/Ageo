@@ -49,3 +49,30 @@ img_New_Appli/
 # ─── Scripts Python de traitement d'images ─────────────────
 crop_*.py
 extract_pdf.py
+
+# ─── Ancien déploiement ────────────────────────────────────
+AGEO_deploy/
+
+# ─── Captures d'écran et PDFs de référence ──────────────────
+*.png
+*.pdf
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.webp
+!client/public/**/*.png
+!client/public/**/*.jpg
+!client/public/**/*.ico
+
+# ─── Base SQLite (ancienne) ────────────────────────────────
+*.db
+*.db-shm
+*.db-wal
+
+# ─── Fichiers divers inutiles ──────────────────────────────
+guide-ageo.html
+ecosystem.config.js
+start-ageo.vbs
+Cmd demarrage auto.txt
+Probleme Sql Server.txt
