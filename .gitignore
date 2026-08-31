@@ -1,0 +1,51 @@
+# ─── Dépendances ───────────────────────────────────────────
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# ─── Builds ────────────────────────────────────────────────
+client/dist/
+dist/
+
+# ─── Environnement et secrets ──────────────────────────────
+.env
+server/.env
+*.env.local
+
+# ─── Uploads et fichiers utilisateur ───────────────────────
+server/uploads/
+uploads/
+
+# ─── Sauvegardes ───────────────────────────────────────────
+*.bak
+*.sql.bak
+backups/
+
+# ─── OS / éditeurs ─────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# ─── Logs ──────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── Docker ────────────────────────────────────────────────
+docker-compose.override.yml
+
+# ─── Fichiers temporaires ──────────────────────────────────
+*.tmp
+*.temp
+
+# ─── Captures de référence (non nécessaires dans le dépôt) ──
+img_New_Appli/
+
+# ─── Scripts Python de traitement d'images ─────────────────
+crop_*.py
+extract_pdf.py

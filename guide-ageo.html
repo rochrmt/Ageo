@@ -1,0 +1,632 @@
+<title>Guide d'utilisation — AGEO</title>
+<style>
+:root {
+  --bg:        #f1f5f9;
+  --surface:   #ffffff;
+  --border:    #e2e8f0;
+  --text:      #0f172a;
+  --text-2:    #475569;
+  --text-3:    #94a3b8;
+  --blue:      #1d4ed8;
+  --blue-bg:   #eff6ff;
+  --blue-mid:  #bfdbfe;
+  --green:     #16a34a;
+  --green-bg:  #f0fdf4;
+  --amber:     #b45309;
+  --amber-bg:  #fffbeb;
+  --red:       #dc2626;
+  --red-bg:    #fef2f2;
+  --sidebar-w: 240px;
+  --radius:    8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:       #0f172a;
+    --surface:  #1e293b;
+    --border:   #334155;
+    --text:     #f1f5f9;
+    --text-2:   #94a3b8;
+    --text-3:   #475569;
+    --blue:     #60a5fa;
+    --blue-bg:  #1e3a5f;
+    --blue-mid: #1e40af;
+    --green:    #4ade80;
+    --green-bg: #052e16;
+    --amber:    #fbbf24;
+    --amber-bg: #1c1408;
+    --red:      #f87171;
+    --red-bg:   #1f0a0a;
+  }
+}
+:root[data-theme="light"] {
+  --bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--text:#0f172a;--text-2:#475569;--text-3:#94a3b8;
+  --blue:#1d4ed8;--blue-bg:#eff6ff;--blue-mid:#bfdbfe;--green:#16a34a;--green-bg:#f0fdf4;
+  --amber:#b45309;--amber-bg:#fffbeb;--red:#dc2626;--red-bg:#fef2f2;
+}
+:root[data-theme="dark"] {
+  --bg:#0f172a;--surface:#1e293b;--border:#334155;--text:#f1f5f9;--text-2:#94a3b8;--text-3:#475569;
+  --blue:#60a5fa;--blue-bg:#1e3a5f;--blue-mid:#1e40af;--green:#4ade80;--green-bg:#052e16;
+  --amber:#fbbf24;--amber-bg:#1c1408;--red:#f87171;--red-bg:#1f0a0a;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+  background: var(--bg);
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Sidebar ── */
+#sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-header {
+  padding: 20px 16px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-header .logo {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--blue);
+  letter-spacing: -0.5px;
+}
+.sidebar-header .logo span { color: var(--text-2); font-weight: normal; font-size: 11px; display: block; margin-top: 1px; letter-spacing: .5px; text-transform: uppercase; }
+.nav-section { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.nav-section:last-child { border-bottom: none; }
+.nav-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-3); padding: 6px 16px 3px; }
+.nav-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 16px;
+  font-size: 13px; color: var(--text-2);
+  cursor: pointer; text-decoration: none;
+  transition: background .12s, color .12s;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover { background: var(--blue-bg); color: var(--blue); }
+.nav-item.active { background: var(--blue-bg); color: var(--blue); border-left-color: var(--blue); font-weight: 600; }
+.nav-icon { font-size: 14px; width: 18px; text-align: center; }
+
+/* ── Main ── */
+#main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  padding: 40px 48px;
+  max-width: 860px;
+}
+
+/* ── Cover ── */
+.cover {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 40px 48px;
+  margin-bottom: 40px;
+}
+.cover-eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-3); margin-bottom: 12px; }
+.cover-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 36px;
+  font-weight: bold;
+  color: var(--text);
+  line-height: 1.2;
+  text-wrap: balance;
+  margin-bottom: 12px;
+}
+.cover-title span { color: var(--blue); }
+.cover-sub { font-size: 15px; color: var(--text-2); max-width: 520px; }
+.cover-meta { display: flex; gap: 24px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+.cover-meta div { font-size: 12px; color: var(--text-3); }
+.cover-meta strong { display: block; font-size: 13px; color: var(--text-2); margin-bottom: 2px; }
+
+/* ── Section ── */
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 40px;
+  margin-bottom: 24px;
+  scroll-margin-top: 24px;
+}
+.section-eyebrow { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-3); margin-bottom: 6px; }
+.section-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  font-weight: bold;
+  color: var(--text);
+  margin-bottom: 6px;
+  text-wrap: balance;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-title .icon { font-size: 20px; }
+.section-desc { font-size: 14px; color: var(--text-2); margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+
+h3 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--text);
+  margin: 24px 0 10px;
+}
+h3:first-of-type { margin-top: 0; }
+
+p { margin-bottom: 10px; color: var(--text-2); font-size: 14px; }
+p:last-child { margin-bottom: 0; }
+
+/* ── Steps ── */
+.steps { display: flex; flex-direction: column; gap: 10px; margin: 12px 0; }
+.step { display: flex; gap: 14px; align-items: flex-start; }
+.step-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--blue); color: #fff;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.step-body { font-size: 14px; color: var(--text-2); }
+.step-body strong { color: var(--text); }
+
+/* ── Callouts ── */
+.note, .tip, .warn {
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-size: 13px;
+  margin: 16px 0;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.note { background: var(--blue-bg); border-left: 3px solid var(--blue); color: var(--blue); }
+.tip  { background: var(--green-bg); border-left: 3px solid var(--green); color: var(--green); }
+.warn { background: var(--amber-bg); border-left: 3px solid var(--amber); color: var(--amber); }
+.note p, .tip p, .warn p { color: inherit; margin: 0; font-size: 13px; }
+.callout-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+/* ── Table ── */
+.table-wrap { overflow-x: auto; margin: 14px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--bg); text-align: left; padding: 8px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--text-3); font-weight: 700; border-bottom: 2px solid var(--border); }
+td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text-2); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--text); }
+
+/* ── Badge ── */
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+.badge-blue  { background: var(--blue-bg);  color: var(--blue); }
+.badge-green { background: var(--green-bg); color: var(--green); }
+.badge-amber { background: var(--amber-bg); color: var(--amber); }
+.badge-red   { background: var(--red-bg);   color: var(--red); }
+
+/* ── Role tags ── */
+.roles { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 16px; }
+.role { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+.role-all   { background: var(--blue-bg);  color: var(--blue); }
+.role-admin { background: var(--amber-bg); color: var(--amber); }
+.role-super { background: var(--red-bg);   color: var(--red); }
+
+/* ── Module grid ── */
+.module-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 16px 0; }
+.module-card { border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; }
+.module-card .mc-icon { font-size: 20px; margin-bottom: 6px; }
+.module-card .mc-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.module-card .mc-desc { font-size: 12px; color: var(--text-2); }
+
+ul { padding-left: 20px; margin: 8px 0; }
+ul li { font-size: 14px; color: var(--text-2); margin-bottom: 4px; }
+ul li strong { color: var(--text); }
+
+@media print {
+  #sidebar { display: none; }
+  #main { margin-left: 0; padding: 20px; }
+  .section { break-inside: avoid; }
+}
+</style>
+
+<!-- Sidebar -->
+<div id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">AGEO <span>Guide d'utilisation</span></div>
+  </div>
+
+  <nav>
+    <div class="nav-section">
+      <div class="nav-label">Introduction</div>
+      <a class="nav-item active" href="#intro" onclick="setActive(this)"><span class="nav-icon">📖</span> Présentation</a>
+      <a class="nav-item" href="#connexion" onclick="setActive(this)"><span class="nav-icon">🔐</span> Connexion</a>
+      <a class="nav-item" href="#roles" onclick="setActive(this)"><span class="nav-icon">👥</span> Rôles & accès</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Modules</div>
+      <a class="nav-item" href="#dashboard" onclick="setActive(this)"><span class="nav-icon">📊</span> Tableau de bord</a>
+      <a class="nav-item" href="#clients" onclick="setActive(this)"><span class="nav-icon">👤</span> Clients</a>
+      <a class="nav-item" href="#produits" onclick="setActive(this)"><span class="nav-icon">📦</span> Produits</a>
+      <a class="nav-item" href="#commandes" onclick="setActive(this)"><span class="nav-icon">🛒</span> Commandes</a>
+      <a class="nav-item" href="#facturation" onclick="setActive(this)"><span class="nav-icon">📄</span> Facturation</a>
+      <a class="nav-item" href="#caisse" onclick="setActive(this)"><span class="nav-icon">💰</span> Caisse</a>
+      <a class="nav-item" href="#ventes" onclick="setActive(this)"><span class="nav-icon">📈</span> Ventes</a>
+      <a class="nav-item" href="#rapports" onclick="setActive(this)"><span class="nav-icon">📋</span> Rapports</a>
+      <a class="nav-item" href="#personnel" onclick="setActive(this)"><span class="nav-icon">🧑‍💼</span> Personnel</a>
+      <a class="nav-item" href="#journal" onclick="setActive(this)"><span class="nav-icon">📝</span> Journal</a>
+      <a class="nav-item" href="#parametres" onclick="setActive(this)"><span class="nav-icon">⚙️</span> Paramètres</a>
+    </div>
+  </nav>
+</div>
+
+<!-- Main content -->
+<div id="main">
+
+  <!-- Cover -->
+  <div class="cover">
+    <div class="cover-eyebrow">Documentation officielle</div>
+    <div class="cover-title"><span>AGEO</span> — Application de Gestion d'Entreprise</div>
+    <div class="cover-sub">Guide complet d'utilisation à destination des utilisateurs, caissiers et administrateurs.</div>
+    <div class="cover-meta">
+      <div><strong>Version</strong> 1.0</div>
+      <div><strong>Date</strong> Juillet 2026</div>
+      <div><strong>Éditeur</strong> Stéphane Roméo OMBRE</div>
+    </div>
+  </div>
+
+  <!-- Présentation -->
+  <div class="section" id="intro">
+    <div class="section-eyebrow">Introduction</div>
+    <div class="section-title"><span class="icon">📖</span> Présentation d'AGEO</div>
+    <div class="section-desc">AGEO est une application de gestion d'entreprise complète permettant de gérer les clients, les commandes, la facturation, la caisse et les ressources humaines depuis une interface web unifiée.</div>
+
+    <h3>Modules disponibles</h3>
+    <div class="module-grid">
+      <div class="module-card"><div class="mc-icon">👤</div><div class="mc-name">Clients</div><div class="mc-desc">Gestion du fichier client, historique, coordonnées</div></div>
+      <div class="module-card"><div class="mc-icon">📦</div><div class="mc-name">Produits</div><div class="mc-desc">Catalogue, catégories, gestion du stock</div></div>
+      <div class="module-card"><div class="mc-icon">🛒</div><div class="mc-name">Commandes</div><div class="mc-desc">Saisie, suivi et livraison des commandes</div></div>
+      <div class="module-card"><div class="mc-icon">📄</div><div class="mc-name">Facturation</div><div class="mc-desc">Création, émission et suivi des factures</div></div>
+      <div class="module-card"><div class="mc-icon">💰</div><div class="mc-name">Caisse</div><div class="mc-desc">Ventes directes, encaissements, dépenses</div></div>
+      <div class="module-card"><div class="mc-icon">📈</div><div class="mc-name">Ventes & Rapports</div><div class="mc-desc">Statistiques, CA, top produits, top clients</div></div>
+      <div class="module-card"><div class="mc-icon">🧑‍💼</div><div class="mc-name">Personnel</div><div class="mc-desc">Employés, congés, paie, documents RH</div></div>
+      <div class="module-card"><div class="mc-icon">📝</div><div class="mc-name">Journal</div><div class="mc-desc">Traçabilité de toutes les actions (admin)</div></div>
+    </div>
+
+    <h3>Prérequis techniques</h3>
+    <p>L'application est accessible depuis n'importe quel navigateur web moderne (Chrome, Firefox, Edge). Aucune installation n'est requise côté utilisateur.</p>
+    <div class="note"><span class="callout-icon">ℹ️</span><p>L'application doit être démarrée par l'administrateur système avant toute utilisation. Adresse d'accès habituelle : <strong>http://[adresse-serveur]:3001</strong></p></div>
+  </div>
+
+  <!-- Connexion -->
+  <div class="section" id="connexion">
+    <div class="section-eyebrow">Accès</div>
+    <div class="section-title"><span class="icon">🔐</span> Connexion & Déconnexion</div>
+    <div class="section-desc">AGEO utilise un système d'authentification sécurisé. Chaque utilisateur dispose d'un identifiant personnel.</div>
+
+    <h3>Se connecter</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body">Ouvrez le navigateur et accédez à l'adresse de l'application.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Saisissez votre <strong>adresse e-mail</strong> et votre <strong>mot de passe</strong>.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body">Cliquez sur <strong>Se connecter</strong>. Vous êtes redirigé vers le tableau de bord.</div></div>
+    </div>
+
+    <h3>Se déconnecter</h3>
+    <p>Cliquez sur votre nom en haut à droite de l'écran, puis sélectionnez <strong>Déconnexion</strong>. La session est immédiatement fermée.</p>
+
+    <div class="warn"><span class="callout-icon">⚠️</span><p>La session expire automatiquement après 10 heures d'inactivité. Vous serez redirigé vers la page de connexion.</p></div>
+
+    <h3>Mot de passe oublié</h3>
+    <p>Contactez votre administrateur pour réinitialiser votre mot de passe. La réinitialisation s'effectue depuis <strong>Paramètres → Sécurité</strong>.</p>
+  </div>
+
+  <!-- Rôles -->
+  <div class="section" id="roles">
+    <div class="section-eyebrow">Administration</div>
+    <div class="section-title"><span class="icon">👥</span> Rôles & Niveaux d'accès</div>
+    <div class="section-desc">AGEO distingue trois niveaux d'accès qui déterminent les actions disponibles pour chaque utilisateur.</div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Rôle</th><th>Accès</th><th>Restrictions</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-blue">Utilisateur</span></td><td>Modules assignés par l'admin, modification du mot de passe</td><td>Ne peut pas gérer les utilisateurs, les paramètres ni le journal</td></tr>
+          <tr><td><span class="badge badge-amber">Administrateur</span></td><td>Tous les modules, gestion des utilisateurs, paramètres</td><td>Ne peut pas désencaisser une facture payée</td></tr>
+          <tr><td><span class="badge badge-red">Super Admin</span></td><td>Accès total sans restriction</td><td>Aucune</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip"><span class="callout-icon">✅</span><p>L'administrateur peut restreindre l'accès d'un utilisateur à certains modules uniquement (ex. : accès Caisse uniquement pour un caissier).</p></div>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="section" id="dashboard">
+    <div class="section-eyebrow">Module</div>
+    <div class="section-title"><span class="icon">📊</span> Tableau de bord</div>
+    <div class="section-desc">Vue d'ensemble de l'activité de l'entreprise en temps réel.</div>
+    <div class="roles"><span class="role role-all">Tous les utilisateurs</span></div>
+
+    <p>Le tableau de bord affiche les indicateurs clés du moment :</p>
+    <ul>
+      <li><strong>Chiffre d'affaires</strong> du mois en cours</li>
+      <li><strong>Commandes</strong> en attente et en cours</li>
+      <li><strong>Alertes stock</strong> : produits en dessous du seuil minimum</li>
+      <li><strong>Factures impayées</strong> : montants à encaisser</li>
+      <li><strong>Ventes récentes</strong> : dernières commandes livrées</li>
+    </ul>
+
+    <div class="tip"><span class="callout-icon">✅</span><p>Le tableau de bord se met à jour automatiquement. Aucune action n'est requise pour rafraîchir les données.</p></div>
+  </div>
+
+  <!-- Clients -->
+  <div class="section" id="clients">
+    <div class="section-eyebrow">Module</div>
+    <div class="section-title"><span class="icon">👤</span> Clients</div>
+    <div class="section-desc">Gestion complète du fichier client : création, consultation, historique des commandes et factures.</div>
+    <div class="roles"><span class="role role-all">Tous les utilisateurs</span></div>
+
+    <h3>Créer un client</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body">Allez dans <strong>Clients</strong> dans le menu de gauche.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Cliquez sur <strong>Nouveau client</strong>.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body">Renseignez le <strong>nom</strong> (obligatoire), l'e-mail, le téléphone, l'adresse et la ville.</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body">Cliquez sur <strong>Enregistrer</strong>.</div></div>
+    </div>
+
+    <h3>Consulter un client</h3>
+    <p>Cliquez sur le nom d'un client dans la liste pour accéder à sa fiche détaillée : coordonnées, historique des commandes, factures associées et statistiques d'achat.</p>
+
+    <h3>Rechercher un client</h3>
+    <p>Utilisez la barre de recherche en haut de la liste. La recherche porte sur le nom, l'e-mail et le téléphone.</p>
+  </div>
+
+  <!-- Produits -->
+  <div class="section" id="produits">
+    <div class="section-eyebrow">Module</div>
+    <div class="section-title"><span class="icon">📦</span> Produits</div>
+    <div class="section-desc">Gestion du catalogue produits, des catégories et des niveaux de stock.</div>
+    <div class="roles"><span class="role role-all">Tous les utilisateurs</span></div>
+
+    <h3>Créer un produit</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body">Allez dans <strong>Produits</strong> et cliquez sur <strong>Nouveau produit</strong>.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Renseignez : <strong>nom</strong>, catégorie, <strong>prix HT</strong>, taux TVA, stock initial et stock minimum.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body">Cliquez sur <strong>Enregistrer</strong>. Un code produit est généré automatiquement.</div></div>
+    </div>
+
+    <h3>Gestion du stock</h3>
+    <p>Sur la fiche d'un produit, utilisez le bouton <strong>Ajuster le stock</strong> pour enregistrer une entrée ou une sortie manuelle. Le stock se décrémente automatiquement à chaque commande et vente directe.</p>
+
+    <div class="warn"><span class="callout-icon">⚠️</span><p>Lorsque le stock passe en dessous du <strong>seuil minimum</strong>, une alerte apparaît sur le tableau de bord.</p></div>
+
+    <h3>Catégories</h3>
+    <p>Les catégories permettent d'organiser le catalogue. Elles se gèrent depuis <strong>Paramètres → Catégories</strong>.</p>
+
+    <h3>Désactiver un produit</h3>
+    <p>Un produit peut être désactivé sans être supprimé. Il n'apparaîtra plus dans les listes de sélection mais son historique est conservé.</p>
+  </div>
+
+  <!-- Commandes -->
+  <div class="section" id="commandes">
+    <div class="section-eyebrow">Module</div>
+    <div class="section-title"><span class="icon">🛒</span> Commandes</div>
+    <div class="section-desc">Saisie et suivi du cycle de vie des commandes clients, de la réception à la livraison.</div>
+    <div class="roles"><span class="role role-all">Tous les utilisateurs</span></div>
+
+    <h3>Créer une commande</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body">Cliquez sur <strong>Nouvelle commande</strong>.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Sélectionnez le <strong>client</strong>.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body">Ajoutez les <strong>produits</strong>, quantités et remises éventuelles.</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body">Validez. Le stock est immédiatement réservé.</div></div>
+    </div>
+
+    <h3>Statuts d'une commande</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Statut</th><th>Signification</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-amber">En attente</span></td><td>Commande enregistrée, non encore traitée</td></tr>
+          <tr><td><span class="badge badge-blue">En cours</span></td><td>Commande en cours de préparation</td></tr>
+          <tr><td><span class="badge badge-green">Livrée</span></td><td>Commande remise au client — intégrée aux statistiques ventes</td></tr>
+          <tr><td><span class="badge badge-red">Annulée</span></td><td>Commande annulée — stock restitué automatiquement</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note"><span class="callout-icon">ℹ️</span><p>Seules les commandes au statut <strong>Livrée</strong> sont comptabilisées dans le chiffre d'affaires et les statistiques ventes.</p></div>
+  </div>
+
+  <!-- Facturation -->
+  <div class="section" id="facturation">
+    <div class="section-eyebrow">Module</div>
+    <div class="section-title"><span class="icon">📄</span> Facturation</div>
+    <div class="section-desc">Création et gestion des factures clients, suivi des paiements partiels et totaux.</div>
+    <div class="roles"><span class="role role-all">Tous les utilisateurs</span></div>
+
+    <h3>Créer une facture</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body">Cliquez sur <strong>Nouvelle facture</strong>.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Sélectionnez le client, la commande associée (optionnel), la date d'échéance et le taux de TVA.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body">Ajoutez les lignes de la facture (description, quantité, prix unitaire, remise).</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body">Enregistrez. La facture est créée en <strong>Brouillon</strong>.</div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body">Passez-la au statut <strong>Émise</strong> pour qu'elle soit encaissable à la caisse.</div></div>
+    </div>
+
+    <h3>Statuts d'une facture</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Statut</th><th>Signification</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-blue">Brouillon</span></td><td>En cours de rédaction, modifiable, supprimable</td></tr>
+          <tr><td><span class="badge badge-amber">Émise</span></td><td>Transmise au client, prête à être encaissée</td></tr>
+          <tr><td><span class="badge badge-blue">Partielle</span></td><td>Acompte reçu, solde restant dû</td></tr>
+          <tr><td><span class="badge badge-green">Payée</span></td><td>Encaissée intégralement via la caisse</td></tr>
+          <tr><td><span class="badge badge-red">Annulée</span></td><td>Facture annulée</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="warn"><span class="callout-icon">⚠️</span><p>Le passage au statut <strong>Payée</strong> se fait uniquement via le module <strong>Caisse</strong> lors de l'encaissement. Il est impossible de le faire manuellement.</p></div>
+  </div>
+
+  <!-- Caisse -->
+  <div class="section" id="caisse">
+    <div class="section-eyebrow">Module</div>
+    <div class="section-title"><span class="icon">💰</span> Caisse</div>
+    <div class="section-desc">Point de vente : ventes directes, encaissements de factures, dépenses et état de caisse.</div>
+    <div class="roles"><span class="role role-all">Tous les utilisateurs</span></div>
+
+    <h3>Ouvrir une session de caisse</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body">Allez dans <strong>Caisse</strong>.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Cliquez sur <strong>Ouvrir la caisse</strong>.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body">Saisissez le <strong>fond de caisse</strong> (montant en espèces disponible à l'ouverture).</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body">Confirmez. La date et l'heure d'ouverture sont enregistrées.</div></div>
+    </div>
+
+    <h3>Vente directe</h3>
+    <p>Utilisez l'onglet <strong>Vente directe</strong> pour vendre des produits sans passer par une commande. Sélectionnez les articles, entrez le montant reçu — le rendu monnaie est calculé automatiquement. Le stock est mis à jour immédiatement.</p>
+
+    <h3>Encaisser une facture</h3>
+    <p>Utilisez l'onglet <strong>Encaisser une facture</strong>. Sélectionnez la facture dans la liste des factures émises, saisissez le montant encaissé (total ou acompte) et le mode de paiement.</p>
+
+    <h3>Enregistrer une dépense</h3>
+    <p>Utilisez l'onglet <strong>Dépense</strong> pour toute sortie d'argent (achat fournisseur, frais divers). Saisissez le motif, le montant et le mode de paiement.</p>
+
+    <h3>Modes de paiement acceptés</h3>
+    <ul>
+      <li><strong>Espèces</strong></li>
+      <li><strong>Mobile Money</strong></li>
+      <li><strong>Carte bancaire</strong></li>
+    </ul>
+
+    <h3>Imprimer l'état de caisse</h3>
+    <p>Cliquez sur <strong>État de caisse</strong> pour générer un document A4 récapitulatif de la session avec le détail de chaque encaissement (articles vendus inclus) et le total net encaissé.</p>
+
+    <h3>Fermer la session</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body">Cliquez sur <strong>Fermer la caisse</strong>.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Saisissez le montant compté en espèces (fond + recette).</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body">Confirmez. La session est archivée et consultable dans l'historique.</div></div>
+    </div>
+
+    <div class="note"><span class="callout-icon">ℹ️</span><p>Une seule session peut être ouverte à la fois. Seul un administrateur peut rouvrir une session fermée.</p></div>
+  </div>
+
+  <!-- Ventes -->
+  <div class="section" id="ventes">
+    <div class="section-eyebrow">Module</div>
+    <div class="section-title"><span class="icon">📈</span> Ventes</div>
+    <div class="section-desc">Analyse des performances commerciales : chiffre d'affaires, évolution, top produits et top clients.</div>
+    <div class="roles"><span class="role role-admin">Administrateur</span><span class="role role-super">Super Admin</span></div>
+
+    <p>Le module Ventes affiche les statistiques calculées à partir des commandes livrées et des ventes directes caisse. Filtrez par période :</p>
+    <ul>
+      <li><strong>Semaine</strong> — 7 derniers jours</li>
+      <li><strong>Mois</strong> — mois calendaire en cours</li>
+      <li><strong>Trimestre</strong> — 3 derniers mois</li>
+      <li><strong>Année</strong> — année calendaire en cours</li>
+    </ul>
+    <p>Chaque KPI est comparé à la période précédente pour visualiser l'évolution (hausse ou baisse en pourcentage).</p>
+  </div>
+
+  <!-- Rapports -->
+  <div class="section" id="rapports">
+    <div class="section-eyebrow">Module</div>
+    <div class="section-title"><span class="icon">📋</span> Rapports</div>
+    <div class="section-desc">Rapports détaillés exportables sur l'activité commerciale et financière.</div>
+    <div class="roles"><span class="role role-admin">Administrateur</span><span class="role role-super">Super Admin</span></div>
+
+    <p>Le module Rapports permet de générer des synthèses périodiques sur les ventes, les stocks, les clients et la facturation. Les rapports peuvent être imprimés ou exportés.</p>
+  </div>
+
+  <!-- Personnel -->
+  <div class="section" id="personnel">
+    <div class="section-eyebrow">Module</div>
+    <div class="section-title"><span class="icon">🧑‍💼</span> Personnel</div>
+    <div class="section-desc">Gestion des ressources humaines : employés, congés, fiches de paie et documents.</div>
+    <div class="roles"><span class="role role-admin">Administrateur</span><span class="role role-super">Super Admin</span></div>
+
+    <h3>Gestion des employés</h3>
+    <p>Créez une fiche par employé avec ses informations personnelles, son département, son poste et son salaire de base. Chaque fiche regroupe l'historique des congés, des paies et des documents RH.</p>
+
+    <h3>Congés</h3>
+    <p>Enregistrez les demandes et les approbations de congé. Les soldes sont calculés automatiquement.</p>
+
+    <h3>Fiches de paie</h3>
+    <p>Générez les fiches de paie mensuelles par employé. Elles sont imprimables directement depuis l'application.</p>
+
+    <h3>Documents</h3>
+    <p>Attachez des documents aux fiches employés (contrats, attestations, etc.).</p>
+  </div>
+
+  <!-- Journal -->
+  <div class="section" id="journal">
+    <div class="section-eyebrow">Module</div>
+    <div class="section-title"><span class="icon">📝</span> Journal d'activité</div>
+    <div class="section-desc">Traçabilité complète de toutes les actions effectuées dans l'application.</div>
+    <div class="roles"><span class="role role-admin">Administrateur</span><span class="role role-super">Super Admin</span></div>
+
+    <p>Le journal enregistre automatiquement chaque action significative : connexions, créations, modifications, suppressions, encaissements. Chaque entrée indique :</p>
+    <ul>
+      <li><strong>Date et heure</strong> de l'action</li>
+      <li><strong>Utilisateur</strong> qui a effectué l'action</li>
+      <li><strong>Module</strong> concerné</li>
+      <li><strong>Description</strong> détaillée</li>
+    </ul>
+
+    <div class="note"><span class="callout-icon">ℹ️</span><p>Le journal est en lecture seule. Aucune entrée ne peut être modifiée ou supprimée, ce qui garantit l'intégrité de la traçabilité.</p></div>
+  </div>
+
+  <!-- Paramètres -->
+  <div class="section" id="parametres">
+    <div class="section-eyebrow">Module</div>
+    <div class="section-title"><span class="icon">⚙️</span> Paramètres</div>
+    <div class="section-desc">Configuration de l'application, gestion des utilisateurs et informations sur la licence.</div>
+
+    <h3>Entreprise <span class="badge badge-amber" style="font-size:10px">Admin</span></h3>
+    <p>Renseignez le nom, le slogan, l'adresse et le logo de votre entreprise. Ces informations apparaissent sur les documents imprimés (factures, reçus, états de caisse).</p>
+
+    <h3>Sécurité <span class="badge badge-blue" style="font-size:10px">Tous</span></h3>
+    <p>Chaque utilisateur peut modifier son mot de passe depuis cet onglet. Les administrateurs peuvent réinitialiser les mots de passe des autres utilisateurs.</p>
+
+    <h3>Catégories <span class="badge badge-amber" style="font-size:10px">Admin</span></h3>
+    <p>Gérez les catégories de produits : création, renommage, suppression (si aucun produit ne l'utilise).</p>
+
+    <h3>Départements <span class="badge badge-amber" style="font-size:10px">Admin</span></h3>
+    <p>Gérez les départements de l'entreprise utilisés dans le module Personnel.</p>
+
+    <h3>Licence <span class="badge badge-amber" style="font-size:10px">Admin</span></h3>
+    <p>Consultez les informations de votre licence logicielle : entreprise, date d'expiration et jours restants. Contactez votre prestataire pour le renouvellement.</p>
+
+    <div class="warn"><span class="callout-icon">⚠️</span><p>Lorsque la licence expire, l'application se verrouille automatiquement. Prenez contact avec votre prestataire avant la date d'expiration.</p></div>
+  </div>
+
+</div>
+
+<script>
+function setActive(el) {
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+}
+// Auto-highlight nav on scroll
+const sections = document.querySelectorAll('.section[id]');
+const navItems = document.querySelectorAll('.nav-item[href]');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navItems.forEach(n => {
+        n.classList.toggle('active', n.getAttribute('href') === '#' + e.target.id);
+      });
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => observer.observe(s));
+</script>

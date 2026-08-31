@@ -1,0 +1,18 @@
+Étape 1 — Activer le service SQL Server Browser
+
+Ouvre services.msc (Démarrer → Exécuter → services.msc)
+Trouve SQL Server Browser
+Clique droit → Propriétés → Type de démarrage : Automatique
+Clique sur Démarrer
+Étape 2 — Activer TCP/IP pour l'instance
+
+Ouvre SQL Server Configuration Manager
+Va dans Configuration du réseau SQL Server → Protocoles pour SQL_OMBRE
+Double-clique sur TCP/IP → Activé : Oui
+Redémarre le service SQL Server depuis services.msc
+Étape 3 — Vérifier le pare-feu
+
+Ouvre un cmd en administrateur et autorise le port :
+
+
+netsh advfirewall firewall add rule name="SQL Server" protocol=TCP dir=in localport=1433 action=allow
