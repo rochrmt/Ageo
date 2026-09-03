@@ -147,7 +147,7 @@ export default function Caisse() {
         {TABS.map((t) => (
           <button key={t.key} type="button" onClick={() => setTab(t.key)}
             className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition
-              ${tab === t.key ? 'bg-brand-700 text-white' : 'text-slate-600 hover:bg-slate-50'}`}>
+              ${tab === t.key ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'}`}>
             <t.icon size={16} /> {t.label}
           </button>
         ))}
@@ -157,15 +157,15 @@ export default function Caisse() {
         <>
       {active ? (
         <>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="card p-5">
               <p className="text-xs font-semibold uppercase text-slate-500">Fond d'ouverture</p>
-              <p className="mt-2 text-2xl font-bold text-slate-900">{formatMoney(active.montant_ouverture, devise)}</p>
+              <p className="mt-2 text-2xl font-bold text-slate-800">{formatMoney(active.montant_ouverture, devise)}</p>
               <p className="mt-1 text-xs text-slate-400">Ouverte le {formatDateTime(active.date_ouverture)}</p>
             </div>
             <div className="card p-5">
               <p className="text-xs font-semibold uppercase text-slate-500">Mouvements</p>
-              <p className="mt-2 text-2xl font-bold text-brand-700">{formatMoney(total, devise)}</p>
+              <p className="mt-2 text-2xl font-bold text-brand-600">{formatMoney(total, devise)}</p>
               <p className="mt-1 text-xs text-slate-400">{transactions.length} transaction(s)</p>
             </div>
             <div className="card p-5">
@@ -179,18 +179,18 @@ export default function Caisse() {
             <button onClick={() => setCloseModal(true)} className="btn-secondary"><Lock size={18} /> Fermer la caisse</button>
           </div>
 
-          <div className="card overflow-hidden">
-            <div className="flex items-center gap-2 px-5 py-4 font-bold text-slate-900"><History size={17} /> Transactions de la session</div>
+          <div className="table-wrap">
+            <div className="flex items-center gap-2 px-5 py-4 font-bold text-slate-800"><History size={17} /> Transactions de la session</div>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-slate-50">
+                <thead>
                   <tr><th className="table-th">Heure</th><th className="table-th">Type</th><th className="table-th">Mode</th><th className="table-th">Notes</th><th className="table-th text-right">Montant</th><th className="table-th"></th>{canDelete && <th className="table-th"></th>}</tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody>
                   {transactions.length === 0 ? (
                     <tr><td colSpan={canDelete ? 7 : 6} className="px-4 py-8 text-center text-sm text-slate-400">Aucune transaction</td></tr>
                   ) : transactions.map((t) => (
-                    <tr key={t.id} className="hover:bg-slate-50">
+                    <tr key={t.id} className="table-row-hover">
                       <td className="table-td text-slate-500">{formatDateTime(t.date_transaction)}</td>
                       <td className="table-td">
                         <span className={`inline-flex items-center gap-1 text-sm font-medium ${t.type === 'retrait' ? 'text-red-600' : 'text-emerald-600'}`}>
@@ -200,11 +200,11 @@ export default function Caisse() {
                       </td>
                       <td className="table-td capitalize">{t.mode_paiement}</td>
                       <td className="table-td text-slate-500">{t.notes || '—'}</td>
-                      <td className={`table-td text-right font-semibold ${t.type === 'retrait' ? 'text-red-600' : 'text-slate-900'}`}>
+                      <td className={`table-td text-right font-semibold ${t.type === 'retrait' ? 'text-red-600' : 'text-slate-800'}`}>
                         {t.type === 'retrait' ? '-' : '+'}{formatMoney(t.montant, devise)}
                       </td>
                       <td className="table-td">
-                        {canPrint && <button onClick={() => printReceipt(t)} title="Imprimer le reçu" className="rounded p-1.5 text-slate-400 hover:bg-brand-50 hover:text-brand-700"><Printer size={14} /></button>}
+                        {canPrint && <button onClick={() => printReceipt(t)} title="Imprimer le reçu" className="rounded p-1.5 text-slate-400 hover:bg-brand-50 hover:text-brand-600"><Printer size={14} /></button>}
                       </td>
                       {canDelete && <td className="table-td"><button onClick={() => deleteTr(t)} className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={14} /></button></td>}
                     </tr>
@@ -217,19 +217,19 @@ export default function Caisse() {
       ) : (
         <div className="card flex flex-col items-center gap-3 py-16 text-center">
           <span className="grid h-16 w-16 place-items-center rounded-full bg-slate-100 text-slate-400"><Lock size={30} /></span>
-          <h2 className="text-xl font-bold text-slate-900">Caisse fermée</h2>
+          <h2 className="text-xl font-bold text-slate-800">Caisse fermée</h2>
           <p className="max-w-sm text-slate-500">Ouvrez une session pour encaisser des factures ou enregistrer des ventes au comptoir.</p>
           <button onClick={() => setOpenModal(true)} className="btn-primary mt-2"><Unlock size={18} /> Ouvrir la caisse</button>
         </div>
       )}
 
-      <div className="card overflow-hidden">
+      <div className="table-wrap">
         <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 px-5 py-4">
-          <span className="flex items-center gap-2 font-bold text-slate-900"><History size={17} /> Historique des sessions</span>
+          <span className="flex items-center gap-2 font-bold text-slate-800"><History size={17} /> Historique des sessions</span>
           <div className="ml-auto flex items-center gap-2">
             <input type="date" className="input w-auto" value={date} onChange={(e) => setDate(e.target.value)} />
             <button onClick={loadSessions} className="btn-secondary"><RefreshCw size={15} /> Actualiser</button>
-            <button onClick={() => setDate(new Date().toISOString().slice(0, 10))} className="text-sm font-semibold text-brand-700">Aujourd'hui</button>
+            <button onClick={() => setDate(new Date().toISOString().slice(0, 10))} className="text-sm font-semibold text-brand-600">Aujourd'hui</button>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -237,16 +237,16 @@ export default function Caisse() {
             <p className="py-10 text-center text-sm text-slate-400">Aucune session pour cette date</p>
           ) : (
             <table className="w-full">
-              <thead className="bg-slate-50">
+              <thead>
                 <tr><th className="table-th">Ouverture</th><th className="table-th">Fermeture</th><th className="table-th text-right">Fond</th><th className="table-th text-right">Mouvements</th><th className="table-th">Statut</th></tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {sessions.map((s) => (
-                  <tr key={s.id} className="hover:bg-slate-50">
+                  <tr key={s.id} className="table-row-hover">
                     <td className="table-td text-slate-500">{formatDateTime(s.date_ouverture)}</td>
                     <td className="table-td text-slate-500">{s.date_fermeture ? formatDateTime(s.date_fermeture) : '—'}</td>
                     <td className="table-td text-right">{formatMoney(s.montant_ouverture, devise)}</td>
-                    <td className="table-td text-right font-semibold">{formatMoney(s.total_transactions, devise)}</td>
+                    <td className="table-td text-right font-semibold text-slate-800">{formatMoney(s.total_transactions, devise)}</td>
                     <td className="table-td">
                       <span className={`badge ${s.statut === 'ouverte' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
                         {s.statut === 'ouverte' ? 'Ouverte' : 'Fermée'}
@@ -264,7 +264,7 @@ export default function Caisse() {
         active ? <CaissePOS settings={settings} devise={devise} onTransaction={loadActive} /> : (
           <div className="card flex flex-col items-center gap-3 py-16 text-center">
             <span className="grid h-16 w-16 place-items-center rounded-full bg-slate-100 text-slate-400"><Lock size={30} /></span>
-            <h2 className="text-xl font-bold text-slate-900">Caisse fermée</h2>
+            <h2 className="text-xl font-bold text-slate-800">Caisse fermée</h2>
             <p className="max-w-sm text-slate-500">Ouvrez une session de caisse pour effectuer des ventes au comptoir.</p>
             <button onClick={() => setOpenModal(true)} className="btn-primary mt-2"><Unlock size={18} /> Ouvrir la caisse</button>
           </div>
@@ -273,7 +273,7 @@ export default function Caisse() {
         active ? <CaisseCommandes settings={settings} devise={devise} onTransaction={loadActive} /> : (
           <div className="card flex flex-col items-center gap-3 py-16 text-center">
             <span className="grid h-16 w-16 place-items-center rounded-full bg-slate-100 text-slate-400"><Lock size={30} /></span>
-            <h2 className="text-xl font-bold text-slate-900">Caisse fermée</h2>
+            <h2 className="text-xl font-bold text-slate-800">Caisse fermée</h2>
             <p className="max-w-sm text-slate-500">Ouvrez une session de caisse pour encaisser les commandes.</p>
             <button onClick={() => setOpenModal(true)} className="btn-primary mt-2"><Unlock size={18} /> Ouvrir la caisse</button>
           </div>
@@ -287,11 +287,11 @@ export default function Caisse() {
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="card p-5">
               <p className="text-xs font-semibold uppercase text-slate-500">Solde actuel</p>
-              <p className="mt-2 text-2xl font-bold text-slate-900">{formatMoney(pcData.petite_caisse.solde, devise)}</p>
+              <p className="mt-2 text-2xl font-bold text-slate-800">{formatMoney(pcData.petite_caisse.solde, devise)}</p>
             </div>
             <div className="card p-5">
               <p className="text-xs font-semibold uppercase text-slate-500">Plafond</p>
-              <p className="mt-2 text-2xl font-bold text-brand-700">{formatMoney(pcData.petite_caisse.plafond, devise)}</p>
+              <p className="mt-2 text-2xl font-bold text-brand-600">{formatMoney(pcData.petite_caisse.plafond, devise)}</p>
               <button type="button" onClick={() => { setNewPlafond(String(pcData.petite_caisse.plafond)); setPlafondModal(true) }} className="mt-1 text-xs font-semibold text-brand-600 hover:underline">Modifier</button>
             </div>
             <div className="card p-5">
@@ -308,21 +308,21 @@ export default function Caisse() {
             <button type="button" onClick={() => setPcTrModal(true)} className="btn-secondary"><Plus size={18} /> Nouvelle transaction</button>
           </div>
 
-          <div className="card overflow-hidden">
-            <div className="flex items-center gap-2 px-5 py-4 font-bold text-slate-900"><History size={17} /> Historique des transactions</div>
+          <div className="table-wrap">
+            <div className="flex items-center gap-2 px-5 py-4 font-bold text-slate-800"><History size={17} /> Historique des transactions</div>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-slate-50">
+                <thead>
                   <tr><th className="table-th">Date</th><th className="table-th">Type</th><th className="table-th">Catégorie</th><th className="table-th">Bénéficiaire</th><th className="table-th">Notes</th><th className="table-th text-right">Montant</th><th className="table-th"></th>{canDelete && <th className="table-th"></th>}</tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody>
                   {pcData.transactions.length === 0 ? (
                     <tr><td colSpan={canDelete ? 8 : 7} className="px-4 py-8 text-center text-sm text-slate-400">Aucune transaction</td></tr>
                   ) : pcData.transactions.map((t) => (
-                    <tr key={t.id} className="hover:bg-slate-50">
+                    <tr key={t.id} className="table-row-hover">
                       <td className="table-td text-slate-500">{formatDateTime(t.date_transaction)}</td>
                       <td className="table-td">
-                        <span className={`badge ${t.type === 'approvisionnement' ? 'bg-brand-100 text-brand-700' : t.type === 'entree' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                        <span className={`badge ${t.type === 'approvisionnement' ? 'bg-brand-100 text-brand-600' : t.type === 'entree' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
                           {t.type === 'approvisionnement' ? 'Approvisionnement' : t.type === 'entree' ? 'Entrée' : 'Dépense'}
                         </span>
                       </td>
@@ -333,7 +333,7 @@ export default function Caisse() {
                         {t.type === 'depense' ? '-' : '+'}{formatMoney(t.montant, devise)}
                       </td>
                       <td className="table-td">
-                        {canPrint && <button onClick={() => printReceipt({ ...t, mode_paiement: 'especes', type: t.type === 'depense' ? 'retrait' : 'encaissement' })} title="Imprimer le reçu" className="rounded p-1.5 text-slate-400 hover:bg-brand-50 hover:text-brand-700"><Printer size={14} /></button>}
+                        {canPrint && <button onClick={() => printReceipt({ ...t, mode_paiement: 'especes', type: t.type === 'depense' ? 'retrait' : 'encaissement' })} title="Imprimer le reçu" className="rounded p-1.5 text-slate-400 hover:bg-brand-50 hover:text-brand-600"><Printer size={14} /></button>}
                       </td>
                       {canDelete && <td className="table-td"><button onClick={() => deletePcTr(t)} className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={14} /></button></td>}
                     </tr>
@@ -346,7 +346,7 @@ export default function Caisse() {
       ) : (
         <div className="card flex flex-col items-center gap-3 py-16 text-center">
           <span className="grid h-16 w-16 place-items-center rounded-full bg-slate-100 text-slate-400"><Wallet size={30} /></span>
-          <h2 className="text-xl font-bold text-slate-900">Petite caisse non configurée</h2>
+          <h2 className="text-xl font-bold text-slate-800">Petite caisse non configurée</h2>
           <p className="max-w-sm text-slate-500">La petite caisse sera créée automatiquement au prochain démarrage du serveur.</p>
         </div>
       )}
@@ -377,7 +377,7 @@ export default function Caisse() {
             <div className="grid grid-cols-2 gap-3">
               {[['encaissement', 'Encaissement'], ['retrait', 'Retrait']].map(([v, l]) => (
                 <button type="button" key={v} onClick={() => setTr({ ...tr, type: v })}
-                  className={`rounded-lg border px-4 py-2.5 text-sm font-semibold ${tr.type === v ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-200 text-slate-600'}`}>{l}</button>
+                  className={`rounded-lg border px-4 py-2.5 text-sm font-semibold ${tr.type === v ? 'border-brand-500 bg-brand-50 text-brand-600' : 'border-slate-200 text-slate-600'}`}>{l}</button>
               ))}
             </div>
           </div>
@@ -390,7 +390,7 @@ export default function Caisse() {
                   {trLignes.map((l, i) => (
                     <div key={i} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-1.5 text-sm">
                       <span className="text-slate-700">{l.nom} x{l.quantite}</span>
-                      <span className="font-semibold text-slate-900">{formatMoney(l.prix * l.quantite, devise)}</span>
+                      <span className="font-semibold text-slate-800">{formatMoney(l.prix * l.quantite, devise)}</span>
                       <button type="button" onClick={() => setTrLignes(trLignes.filter((_, idx) => idx !== i))} className="text-red-400 hover:text-red-600"><X size={14} /></button>
                     </div>
                   ))}
@@ -447,7 +447,7 @@ export default function Caisse() {
             <div className="grid grid-cols-2 gap-3">
               {[['depense', 'Dépense'], ['entree', 'Entrée']].map(([v, l]) => (
                 <button type="button" key={v} onClick={() => setPcTr({ ...pcTr, type: v })}
-                  className={`rounded-lg border px-4 py-2.5 text-sm font-semibold ${pcTr.type === v ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-200 text-slate-600'}`}>{l}</button>
+                  className={`rounded-lg border px-4 py-2.5 text-sm font-semibold ${pcTr.type === v ? 'border-brand-500 bg-brand-50 text-brand-600' : 'border-slate-200 text-slate-600'}`}>{l}</button>
               ))}
             </div>
           </div>
@@ -478,7 +478,7 @@ export default function Caisse() {
         <div className="fixed inset-0 z-50 flex flex-col bg-slate-900/60 p-4 sm:p-8" onClick={() => setReceipt(null)}>
           <div className="mx-auto flex h-full w-full max-w-sm flex-col overflow-hidden rounded-xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
-              <div className="flex items-center gap-2 font-bold text-slate-900"><Eye size={18} /> Reçu de caisse</div>
+              <div className="flex items-center gap-2 font-bold text-slate-800"><Eye size={18} /> Reçu de caisse</div>
               <div className="flex items-center gap-2">
                 <button onClick={doPrint} className="btn-primary py-2"><Printer size={16} /> Imprimer</button>
                 <button onClick={() => setReceipt(null)} className="btn-secondary py-2">Fermer</button>

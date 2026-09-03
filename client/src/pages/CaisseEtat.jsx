@@ -103,7 +103,7 @@ export default function CaisseEtat({ devise }) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-bold text-slate-900">État de caisse</h3>
+          <h3 className="text-lg font-bold text-slate-800">État de caisse</h3>
           <p className="text-sm text-slate-400">Session #{etat.session.id} — ouverte le {formatDateTime(etat.session.date_ouverture)}</p>
         </div>
         <div className="flex gap-2">
@@ -117,7 +117,7 @@ export default function CaisseEtat({ devise }) {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="card p-5">
           <p className="text-xs font-semibold uppercase text-slate-500">Fond d'ouverture</p>
-          <p className="mt-2 text-2xl font-bold text-slate-900">{formatMoney(etat.session.montant_ouverture, devise)}</p>
+          <p className="mt-2 text-2xl font-bold text-slate-800">{formatMoney(etat.session.montant_ouverture, devise)}</p>
         </div>
         <div className="card p-5">
           <p className="text-xs font-semibold uppercase text-slate-500">Total encaissements</p>
@@ -135,16 +135,16 @@ export default function CaisseEtat({ devise }) {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="card overflow-hidden">
-          <div className="border-b border-slate-100 px-5 py-3 font-bold text-slate-900">Encaissements par mode de paiement</div>
+          <div className="border-b border-slate-100 px-5 py-3 font-bold text-slate-800">Encaissements par mode de paiement</div>
           <table className="w-full">
-            <thead className="bg-slate-50">
+            <thead>
               <tr><th className="table-th">Mode</th><th className="table-th text-right">Montant</th></tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {Object.keys(etat.par_mode || {}).length === 0 ? (
                 <tr><td colSpan={2} className="px-4 py-6 text-center text-sm text-slate-400">Aucun encaissement</td></tr>
               ) : Object.entries(etat.par_mode).map(([mode, montant]) => (
-                <tr key={mode} className="hover:bg-slate-50">
+                <tr key={mode} className="table-row-hover">
                   <td className="table-td">{MODE_LABELS[mode] || mode}</td>
                   <td className="table-td text-right font-semibold text-emerald-600">{formatMoney(montant, devise)}</td>
                 </tr>
@@ -154,22 +154,22 @@ export default function CaisseEtat({ devise }) {
         </div>
 
         <div className="card overflow-hidden">
-          <div className="border-b border-slate-100 px-5 py-3 font-bold text-slate-900">Transactions ({etat.nb_transactions})</div>
+          <div className="border-b border-slate-100 px-5 py-3 font-bold text-slate-800">Transactions ({etat.nb_transactions})</div>
           <div className="max-h-80 overflow-y-auto">
             <table className="w-full">
-              <thead className="bg-slate-50 sticky top-0">
+              <thead className="sticky top-0">
                 <tr><th className="table-th">Heure</th><th className="table-th">Type</th><th className="table-th text-right">Montant</th></tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {(etat.transactions || []).map((t) => (
-                  <tr key={t.id} className="hover:bg-slate-50">
+                  <tr key={t.id} className="table-row-hover">
                     <td className="table-td text-slate-500 text-xs">{formatDateTime(t.date_transaction)}</td>
                     <td className="table-td">
                       <span className={`text-xs font-semibold ${t.type === 'retrait' ? 'text-red-600' : 'text-emerald-600'}`}>
                         {t.type === 'retrait' ? 'Retrait' : 'Encaissement'}
                       </span>
                     </td>
-                    <td className={`table-td text-right font-semibold ${t.type === 'retrait' ? 'text-red-600' : 'text-slate-900'}`}>
+                    <td className={`table-td text-right font-semibold ${t.type === 'retrait' ? 'text-red-600' : 'text-slate-800'}`}>
                       {t.type === 'retrait' ? '-' : '+'}{formatMoney(t.montant, devise)}
                     </td>
                   </tr>

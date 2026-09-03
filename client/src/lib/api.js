@@ -18,6 +18,13 @@ api.interceptors.response.use(
       localStorage.removeItem('user')
       if (!location.pathname.startsWith('/login')) location.href = '/login'
     }
+    // 402 = licence expirée — déconnecter et rediriger vers login avec message
+    if (err.response?.status === 402 && localStorage.getItem('token')) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      sessionStorage.setItem('licence_error', err.response?.data?.error || 'Licence expirée')
+      if (!location.pathname.startsWith('/login')) location.href = '/login'
+    }
     return Promise.reject(err)
   },
 )

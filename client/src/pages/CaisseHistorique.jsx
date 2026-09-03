@@ -116,7 +116,7 @@ export default function CaisseHistorique({ devise }) {
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h3 className="text-lg font-bold text-slate-900">Historique des transactions</h3>
+          <h3 className="text-lg font-bold text-slate-800">Historique des transactions</h3>
           <p className="text-sm text-slate-400">Filtrez par période et imprimez le rapport complet</p>
         </div>
         <div className="flex flex-wrap items-end gap-2">
@@ -143,10 +143,10 @@ export default function CaisseHistorique({ devise }) {
       ) : (
         <>
           {/* Caisse Principale */}
-          <div className="card overflow-hidden">
+          <div className="table-wrap">
             <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-4">
-              <Wallet size={18} className="text-brand-700" />
-              <span className="font-bold text-slate-900">Caisse Principale</span>
+              <Wallet size={18} className="text-brand-600" />
+              <span className="font-bold text-slate-800">Caisse Principale</span>
               <span className="ml-auto text-sm text-slate-400">{data.caisse_principale.nb} transaction(s)</span>
             </div>
             <div className="grid gap-3 px-5 py-3 sm:grid-cols-4">
@@ -160,23 +160,23 @@ export default function CaisseHistorique({ devise }) {
               </div>
               <div className="text-center">
                 <p className="text-xs uppercase text-slate-500">Solde</p>
-                <p className="text-lg font-bold text-slate-900">{formatMoney(data.caisse_principale.solde, devise)}</p>
+                <p className="text-lg font-bold text-slate-800">{formatMoney(data.caisse_principale.solde, devise)}</p>
               </div>
               <div className="text-center">
                 <p className="text-xs uppercase text-slate-500">Transactions</p>
-                <p className="text-lg font-bold text-slate-900">{data.caisse_principale.nb}</p>
+                <p className="text-lg font-bold text-slate-800">{data.caisse_principale.nb}</p>
               </div>
             </div>
             <div className="max-h-80 overflow-x-auto overflow-y-auto">
               <table className="w-full">
-                <thead className="bg-slate-50 sticky top-0">
+                <thead className="sticky top-0">
                   <tr><th className="table-th">Date/Heure</th><th className="table-th">Type</th><th className="table-th">Mode</th><th className="table-th">Notes</th><th className="table-th text-right">Montant</th></tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody>
                   {data.caisse_principale.transactions.length === 0 ? (
                     <tr><td colSpan={5} className="px-4 py-6 text-center text-sm text-slate-400">Aucune transaction sur cette période</td></tr>
                   ) : data.caisse_principale.transactions.map((t) => (
-                    <tr key={t.id} className="hover:bg-slate-50">
+                    <tr key={t.id} className="table-row-hover">
                       <td className="table-td text-xs text-slate-500">{formatDateTime(t.date_transaction)}</td>
                       <td className="table-td">
                         <span className={`text-xs font-semibold ${t.type === 'retrait' ? 'text-red-600' : 'text-emerald-600'}`}>
@@ -185,7 +185,7 @@ export default function CaisseHistorique({ devise }) {
                       </td>
                       <td className="table-td text-sm">{MODE_LABELS[t.mode_paiement] || t.mode_paiement || '—'}</td>
                       <td className="table-td text-sm text-slate-500">{t.notes || '—'}</td>
-                      <td className={`table-td text-right font-semibold ${t.type === 'retrait' ? 'text-red-600' : 'text-slate-900'}`}>
+                      <td className={`table-td text-right font-semibold ${t.type === 'retrait' ? 'text-red-600' : 'text-slate-800'}`}>
                         {t.type === 'retrait' ? '-' : '+'}{formatMoney(t.montant, devise)}
                       </td>
                     </tr>
@@ -196,10 +196,10 @@ export default function CaisseHistorique({ devise }) {
           </div>
 
           {/* Petite Caisse */}
-          <div className="card overflow-hidden">
+          <div className="table-wrap">
             <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-4">
-              <ArrowRightLeft size={18} className="text-brand-700" />
-              <span className="font-bold text-slate-900">Petite Caisse</span>
+              <ArrowRightLeft size={18} className="text-brand-600" />
+              <span className="font-bold text-slate-800">Petite Caisse</span>
               <span className="ml-auto text-sm text-slate-400">{data.petite_caisse.nb} transaction(s)</span>
             </div>
             <div className="grid gap-3 px-5 py-3 sm:grid-cols-4">
@@ -217,22 +217,22 @@ export default function CaisseHistorique({ devise }) {
               </div>
               <div className="text-center">
                 <p className="text-xs uppercase text-slate-500">Solde</p>
-                <p className="text-lg font-bold text-slate-900">{formatMoney(data.petite_caisse.solde, devise)}</p>
+                <p className="text-lg font-bold text-slate-800">{formatMoney(data.petite_caisse.solde, devise)}</p>
               </div>
             </div>
             <div className="max-h-80 overflow-x-auto overflow-y-auto">
               <table className="w-full">
-                <thead className="bg-slate-50 sticky top-0">
+                <thead className="sticky top-0">
                   <tr><th className="table-th">Date/Heure</th><th className="table-th">Type</th><th className="table-th">Catégorie</th><th className="table-th">Bénéficiaire</th><th className="table-th">Notes</th><th className="table-th text-right">Montant</th></tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody>
                   {data.petite_caisse.transactions.length === 0 ? (
                     <tr><td colSpan={6} className="px-4 py-6 text-center text-sm text-slate-400">Aucune transaction sur cette période</td></tr>
                   ) : data.petite_caisse.transactions.map((t) => (
-                    <tr key={t.id} className="hover:bg-slate-50">
+                    <tr key={t.id} className="table-row-hover">
                       <td className="table-td text-xs text-slate-500">{formatDateTime(t.date_transaction)}</td>
                       <td className="table-td">
-                        <span className={`badge ${t.type === 'approvisionnement' ? 'bg-brand-100 text-brand-700' : t.type === 'entree' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                        <span className={`badge ${t.type === 'approvisionnement' ? 'bg-brand-100 text-brand-600' : t.type === 'entree' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
                           {t.type === 'approvisionnement' ? 'Appro.' : t.type === 'entree' ? 'Entrée' : 'Dépense'}
                         </span>
                       </td>

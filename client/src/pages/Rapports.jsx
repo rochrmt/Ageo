@@ -61,9 +61,19 @@ export default function Rapports() {
 
   return (
     <div className="space-y-5">
+      <div className="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-white p-1.5">
+        {TABS.map((t) => (
+          <button key={t.key} type="button" onClick={() => { setData(null); setTab(t.key) }}
+            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition
+              ${tab === t.key ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'}`}>
+            <t.icon size={16} /> {t.label}
+          </button>
+        ))}
+      </div>
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Rapports & Statistiques</h2>
+          <h2 className="text-xl font-bold text-slate-800">Statistiques & Rapports</h2>
           <p className="text-sm text-slate-400">Analyse de l'activité commerciale</p>
         </div>
         {tab !== 'stock' && (
@@ -71,16 +81,6 @@ export default function Rapports() {
             {years.map((y) => <option key={y} value={y}>{y}</option>)}
           </select>
         )}
-      </div>
-
-      <div className="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-white p-1.5">
-        {TABS.map((t) => (
-          <button key={t.key} type="button" onClick={() => { setData(null); setTab(t.key) }}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition
-              ${tab === t.key ? 'bg-brand-700 text-white' : 'text-slate-600 hover:bg-slate-50'}`}>
-            <t.icon size={16} /> {t.label}
-          </button>
-        ))}
       </div>
 
       {tab === 'employes' ? (
@@ -122,17 +122,19 @@ function Synthese({ data, annee, devise, onExport }) {
     <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
-          <div key={c.label} className="card p-5">
-            <span className={`mb-3 grid h-10 w-10 place-items-center rounded-lg ${c.color}`}><c.icon size={18} /></span>
-            <p className="text-2xl font-bold text-slate-900">{c.value}</p>
-            <p className="text-sm text-slate-400">{c.label}</p>
-            {c.sub && <p className="text-xs text-slate-400">{c.sub}</p>}
+          <div key={c.label} className="stat-card card-hover">
+            <span className={`stat-icon ${c.color}`}><c.icon size={22} /></span>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{c.label}</p>
+              <p className="mt-1 text-2xl font-bold text-slate-800">{c.value}</p>
+              {c.sub && <p className="text-xs text-slate-400">{c.sub}</p>}
+            </div>
           </div>
         ))}
       </div>
       <div className="card p-5">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-bold text-slate-900">Chiffre d'affaires mensuel {annee}</h3>
+          <h3 className="text-base font-bold text-slate-800">Chiffre d'affaires mensuel {annee}</h3>
           <button type="button" onClick={onExport} className="btn-secondary py-2"><Download size={15} /> Exporter CSV</button>
         </div>
         <div className="h-80">
@@ -145,7 +147,7 @@ function Synthese({ data, annee, devise, onExport }) {
                 <XAxis dataKey="mois" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(v) => formatMoney(v, devise)} />
-                <Bar dataKey="ca" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="ca" fill="#4f46e5" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -159,8 +161,8 @@ function Stock({ data, devise, onExport }) {
   return (
     <>
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="card p-5"><p className="text-xs font-semibold uppercase text-slate-500">Valeur totale du stock</p><p className="mt-2 text-2xl font-bold text-slate-900">{formatMoney(data.valeur_totale, devise)}</p></div>
-        <div className="card p-5"><p className="text-xs font-semibold uppercase text-slate-500">Produits en alerte</p><p className="mt-2 text-2xl font-bold text-amber-600">{data.alertes}</p></div>
+        <div className="card p-5"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Valeur totale du stock</p><p className="mt-1 text-2xl font-bold text-slate-800">{formatMoney(data.valeur_totale, devise)}</p></div>
+        <div className="card p-5"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Articles en alerte</p><p className="mt-1 text-2xl font-bold text-amber-600">{data.alertes}</p></div>
       </div>
       <ListReport title="Inventaire" onExport={onExport}
         cols={['Code', 'Produit', 'Stock', 'Seuil', 'Valeur']}
@@ -171,19 +173,19 @@ function Stock({ data, devise, onExport }) {
 
 function ListReport({ title, cols, rows, empty, onExport }) {
   return (
-    <div className="card overflow-hidden">
+    <div className="table-wrap">
       <div className="flex items-center justify-between px-5 py-4">
-        <h3 className="font-bold text-slate-900">{title}</h3>
+        <h3 className="text-base font-bold text-slate-800">{title}</h3>
         <button type="button" onClick={onExport} className="btn-secondary py-2"><Download size={15} /> Exporter CSV</button>
       </div>
       <div className="overflow-x-auto">
         {rows.length === 0 ? <p className="py-10 text-center text-sm text-slate-400">{empty}</p> : (
           <table className="w-full">
-            <thead className="bg-slate-50"><tr>{cols.map((c, i) => <th key={i} className={`table-th ${i >= 2 ? 'text-right' : ''}`}>{c}</th>)}</tr></thead>
-            <tbody className="divide-y divide-slate-100">
+            <thead><tr>{cols.map((c, i) => <th key={i} className={`table-th ${i >= 2 ? 'text-right' : ''}`}>{c}</th>)}</tr></thead>
+            <tbody>
               {rows.map((r, i) => (
-                <tr key={i} className="hover:bg-slate-50">
-                  {r.map((v, j) => <td key={j} className={`table-td ${j >= 2 ? 'text-right font-semibold' : ''} ${j === 0 ? 'text-xs text-slate-400' : ''}`}>{v}</td>)}
+                <tr key={i} className="table-row-hover">
+                  {r.map((v, j) => <td key={j} className={`table-td ${j >= 2 ? 'text-right font-semibold text-slate-800' : ''} ${j === 0 ? 'text-xs text-slate-400' : 'text-slate-600'}`}>{v}</td>)}
                 </tr>
               ))}
             </tbody>
@@ -265,7 +267,7 @@ function RapportsEmployes() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">
+          <h2 className="text-lg font-bold text-slate-800">
             {isAdmin ? 'Rapports d\'activité des employés' : 'Mes rapports d\'activité'}
           </h2>
           <p className="text-sm text-slate-400">
@@ -286,7 +288,7 @@ function RapportsEmployes() {
         </div>
       )}
 
-      <div className="card overflow-hidden">
+      <div className="table-wrap">
         <div className="overflow-x-auto">
           {rapports.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-16 text-center">
@@ -302,7 +304,7 @@ function RapportsEmployes() {
             </div>
           ) : (
             <table className="w-full">
-              <thead className="bg-slate-50">
+              <thead>
                 <tr>
                   {isAdmin && <th className="table-th">Employé</th>}
                   <th className="table-th">Titre</th>
@@ -313,15 +315,15 @@ function RapportsEmployes() {
                   <th className="table-th text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {rapports.map((r) => (
-                  <tr key={r.id} className={`hover:bg-slate-50 ${!r.lu_admin ? 'bg-amber-50/40' : ''}`}>
-                    {isAdmin && <td className="table-td font-semibold text-slate-900">{r.employe_nom}</td>}
+                  <tr key={r.id} className={`table-row-hover ${!r.lu_admin ? 'bg-amber-50/40' : ''}`}>
+                    {isAdmin && <td className="table-td font-semibold text-slate-800">{r.employe_nom}</td>}
                     <td className="table-td">
-                      <p className="font-semibold text-slate-900">{r.titre}</p>
+                      <p className="font-semibold text-slate-800">{r.titre}</p>
                       {r.description && <p className="text-xs text-slate-400">{r.description}</p>}
                     </td>
-                    <td className="table-td">{r.periode || '—'}</td>
+                    <td className="table-td text-slate-600">{r.periode || '—'}</td>
                     <td className="table-td text-xs text-slate-500">
                       <span className="inline-flex items-center gap-1"><FileText size={14} /> {r.nom_original}</span>
                     </td>

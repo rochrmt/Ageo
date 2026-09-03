@@ -9,3 +9,4 @@ server/*.log
 client/dist
 extract_pdf.py
 *.bak
+nginx/

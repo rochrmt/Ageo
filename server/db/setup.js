@@ -273,13 +273,22 @@ async function createTables() {
       prime_anciennete          DOUBLE DEFAULT 0,
       autres_primes             DOUBLE DEFAULT 0,
       autres_primes_libelle     VARCHAR(255),
+      heures_sup                INT DEFAULT 0,
+      taux_heure_sup            DOUBLE DEFAULT 0,
+      montant_heures_sup        DOUBLE DEFAULT 0,
+      jours_conge_paye          INT DEFAULT 0,
+      heures_conge              DOUBLE DEFAULT 0,
+      montant_conge             DOUBLE DEFAULT 0,
+      avances_salaire           DOUBLE DEFAULT 0,
       avance_salaire            DOUBLE DEFAULT 0,
       retenue_absence           DOUBLE DEFAULT 0,
       nb_jours_absence          INT DEFAULT 0,
       autres_deductions         DOUBLE DEFAULT 0,
       autres_deductions_libelle VARCHAR(255),
+      lignes_supplementaires    TEXT,
       statut                    VARCHAR(20) NOT NULL DEFAULT 'en_attente',
       date_paiement             DATE,
+      mode_paiement             VARCHAR(50),
       notes                     TEXT,
       created_at                DATETIME DEFAULT CURRENT_TIMESTAMP,
       CONSTRAINT UQ_bulletin_employe_mois UNIQUE (employe_id, mois),
@@ -410,11 +419,20 @@ async function runMigrations() {
     ['prime_anciennete',          'DOUBLE DEFAULT 0'],
     ['autres_primes',             'DOUBLE DEFAULT 0'],
     ['autres_primes_libelle',     'VARCHAR(255)'],
+    ['heures_sup',                'INT DEFAULT 0'],
+    ['taux_heure_sup',            'DOUBLE DEFAULT 0'],
+    ['montant_heures_sup',        'DOUBLE DEFAULT 0'],
+    ['jours_conge_paye',          'INT DEFAULT 0'],
+    ['heures_conge',              'DOUBLE DEFAULT 0'],
+    ['montant_conge',             'DOUBLE DEFAULT 0'],
+    ['avances_salaire',           'DOUBLE DEFAULT 0'],
     ['avance_salaire',            'DOUBLE DEFAULT 0'],
     ['retenue_absence',           'DOUBLE DEFAULT 0'],
     ['nb_jours_absence',          'INT DEFAULT 0'],
     ['autres_deductions',         'DOUBLE DEFAULT 0'],
     ['autres_deductions_libelle', 'VARCHAR(255)'],
+    ['lignes_supplementaires',    'TEXT'],
+    ['mode_paiement',             'VARCHAR(50)'],
   ]) {
     await addColIfMissing('bulletins_paie', col, type)
   }
@@ -470,6 +488,18 @@ async function runMigrations() {
 
   // Colonne email pour les utilisateurs (authentification par email)
   await addColIfMissing('users', 'email', "VARCHAR(255) NULL")
+
+  // Colonne is_original pour identifier le super admin original (non supprimable, invisible aux autres)
+  await addColIfMissing('users', 'is_original', "TINYINT DEFAULT 0")
+  // Marquer le premier super_admin comme original
+  const origSA = await db.getOne("SELECT id FROM users WHERE role = 'super_admin' AND is_original = 1")
+  if (!origSA) {
+    const firstSA = await db.getOne("SELECT id FROM users WHERE role = 'super_admin' ORDER BY id LIMIT 1")
+    if (firstSA) {
+      await db.run("UPDATE users SET is_original = 1 WHERE id = ?", [firstSA.id])
+      console.log('[AGEO] Super admin original marqué (id=' + firstSA.id + ')')
+    }
+  }
 }
 
 // ── Données initiales (admin uniquement) ─────────────────────────────────────
@@ -480,7 +510,7 @@ async function seedData() {
 
   const hash = bcrypt.hashSync('admin1234', 10)
   await db.run(
-    "INSERT INTO users (username, email, nom, password_hash, role) VALUES (?, ?, ?, ?, 'super_admin')",
+    "INSERT INTO users (username, email, nom, password_hash, role, is_original) VALUES (?, ?, ?, ?, 'super_admin', 1)",
     ['admin', 'admin@entreprise.com', 'Administrateur', hash],
   )
   console.log('[AGEO] Compte super_admin créé → email: admin@entreprise.com / mot de passe: admin1234')

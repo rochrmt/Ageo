@@ -138,7 +138,7 @@ export default function CaissePOS({ settings, devise, onTransaction }) {
               <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-50 text-brand-600"><Package size={18} /></span>
               <span className="line-clamp-2 text-sm font-semibold text-slate-800">{p.nom}</span>
               <span className="text-xs text-slate-400">Stock: {p.stock}</span>
-              <span className="text-sm font-bold text-brand-700">{formatMoney(p.prix_ht, devise)}</span>
+              <span className="text-sm font-bold text-brand-600">{formatMoney(p.prix_ht, devise)}</span>
             </button>
           ))}
         </div>
@@ -147,7 +147,7 @@ export default function CaissePOS({ settings, devise, onTransaction }) {
       {/* Cart */}
       <div className="space-y-4">
         <div className="card flex flex-col" style={{ maxHeight: '70vh' }}>
-          <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3 font-bold text-slate-900">
+          <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3 font-bold text-slate-800">
             <ShoppingCart size={18} /> Panier
             {cart.length > 0 && (
               <button onClick={() => setCart([])} className="ml-auto text-xs font-semibold text-red-500 hover:text-red-700">
@@ -175,7 +175,7 @@ export default function CaissePOS({ settings, devise, onTransaction }) {
                       <span className="w-8 text-center text-sm font-bold">{item.quantite}</span>
                       <button onClick={() => updateQty(item.produit_id, 1)} className="grid h-6 w-6 place-items-center rounded bg-slate-100 text-slate-600 hover:bg-slate-200"><Plus size={14} /></button>
                     </div>
-                    <span className="w-20 text-right text-sm font-bold text-slate-900">{formatMoney(item.prix * item.quantite, devise)}</span>
+                    <span className="w-20 text-right text-sm font-bold text-slate-800">{formatMoney(item.prix * item.quantite, devise)}</span>
                     <button onClick={() => removeFromCart(item.produit_id)} className="text-slate-300 hover:text-red-500"><X size={16} /></button>
                   </div>
                 ))}
@@ -187,7 +187,7 @@ export default function CaissePOS({ settings, devise, onTransaction }) {
             <div className="border-t border-slate-100 p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-slate-600">Total</span>
-                <span className="text-xl font-bold text-brand-700">{formatMoney(cartTotal, devise)}</span>
+                <span className="text-xl font-bold text-brand-600">{formatMoney(cartTotal, devise)}</span>
               </div>
 
               <div>
@@ -214,7 +214,7 @@ export default function CaissePOS({ settings, devise, onTransaction }) {
         <div className="fixed inset-0 z-50 flex flex-col bg-slate-900/60 p-4 sm:p-8" onClick={() => setReceipt(null)}>
           <div className="mx-auto flex h-full w-full max-w-sm flex-col overflow-hidden rounded-xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
-              <div className="flex items-center gap-2 font-bold text-slate-900"><Eye size={18} /> Reçu de caisse</div>
+              <div className="flex items-center gap-2 font-bold text-slate-800"><Eye size={18} /> Reçu de caisse</div>
               <div className="flex items-center gap-2">
                 <button onClick={doPrint} className="btn-primary py-2"><Printer size={16} /> Imprimer</button>
                 <button onClick={() => setReceipt(null)} className="btn-secondary py-2">Fermer</button>

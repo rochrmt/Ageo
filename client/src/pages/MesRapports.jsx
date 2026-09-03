@@ -88,7 +88,7 @@ export default function MesRapports() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Mes Rapports d'Activité</h2>
+          <h2 className="text-xl font-bold text-slate-800">Mes Rapports d'Activité</h2>
           <p className="text-sm text-slate-400">Uploadez vos rapports pour l'administration</p>
         </div>
         <button type="button" onClick={() => setModal(true)} className="btn-primary">
@@ -96,8 +96,8 @@ export default function MesRapports() {
         </button>
       </div>
 
-      <div className="card overflow-hidden">
-        <div className="flex items-center gap-2 px-5 py-4 font-bold text-slate-900">
+      <div className="table-wrap">
+        <div className="flex items-center gap-2 px-5 py-4 font-bold text-slate-800">
           <FileText size={17} /> Mes rapports envoyés ({rapports.length})
         </div>
         <div className="overflow-x-auto">
@@ -109,7 +109,7 @@ export default function MesRapports() {
             </div>
           ) : (
             <table className="w-full">
-              <thead className="bg-slate-50">
+              <thead>
                 <tr>
                   <th className="table-th">Titre</th>
                   <th className="table-th">Période</th>
@@ -119,14 +119,14 @@ export default function MesRapports() {
                   <th className="table-th text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {rapports.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-50">
+                  <tr key={r.id} className="table-row-hover">
                     <td className="table-td">
-                      <p className="font-semibold text-slate-900">{r.titre}</p>
+                      <p className="font-semibold text-slate-800">{r.titre}</p>
                       {r.description && <p className="text-xs text-slate-400">{r.description}</p>}
                     </td>
-                    <td className="table-td">{r.periode || '—'}</td>
+                    <td className="table-td text-slate-600">{r.periode || '—'}</td>
                     <td className="table-td text-xs text-slate-500">
                       <span className="inline-flex items-center gap-1"><FileText size={14} /> {r.nom_original}</span>
                     </td>

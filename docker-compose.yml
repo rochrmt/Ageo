@@ -1,11 +1,11 @@
 # ============================================================
-#  AGEO — Stack Docker complète (app + MySQL)
+#  AGEO — Stack Docker complète (app + MySQL + Nginx)
 #  Usage : docker compose up -d --build
-#  Accès réseau local : http://IP_DE_LA_MACHINE:3001
+#  Accès : http://IP_DU_VPS (port 80) ou https://votre-domaine.com
 # ============================================================
 
 services:
-  # ── Base de données MySQL ────────────────────────────────────────────────
+  # ── Base de données MySQL (interne, non exposée) ────────────────────────
   mysql:
     image: mysql:8.0
     container_name: ageo-mysql
@@ -14,8 +14,10 @@ services:
       MYSQL_DATABASE: ageo
     volumes:
       - ageo-mysql-data:/var/lib/mysql
-    ports:
-      - "3306:3306"
+    # Pas de ports exposés — MySQL est accessible uniquement
+    # via le réseau interne Docker (nom du service: mysql)
+    expose:
+      - "3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p$$MYSQL_ROOT_PASSWORD"]
       interval: 10s
@@ -33,26 +35,37 @@ services:
         condition: service_healthy
     environment:
       PORT: "3001"
-      DB_SERVER: mysql              # nom du service MySQL ci-dessus
+      DB_SERVER: mysql
       DB_PORT: "3306"
       DB_NAME: ageo
       DB_USER: root
-      DB_PASSWORD: Ageo@2026!       # doit correspondre à MYSQL_ROOT_PASSWORD
-      # Changez cette valeur par une chaîne aléatoire longue
-      JWT_SECRET: changez_cette_valeur_par_une_chaine_aleatoire_longue
+      DB_PASSWORD: Ageo@2026!
+      JWT_SECRET: d874f3bb86debb314eb424af233d01669f041233b416477d560c4132092580af3c87be9e3007a828d413b0b8ad31e18c
       JWT_EXPIRES: 10h
-      # Secret de licence PROPRE à votre installation
       LICENCE_SECRET: 12fffd0329f96cf89632f961f0f24c8269552b2f6405ce5f3ba560b74f2bca5d16f8231e3ddc97ce97d215a7be976def
-      # Laissez vide pour le mode interne (utilisation illimitée)
       LICENCE_KEY: "eyJlbnRyZXByaXNlIjoiTW9uIEVudHJlcHJpc2UiLCJleHBpcmF0aW9uIjoiMjAyNy0xMi0zMSIsIm1heF91c2VycyI6bnVsbCwibW9kdWxlcyI6WyJhbGwiXSwiaXNzdWVkX2F0IjoiMjAyNi0wOC0wNyJ9.9079b0ac2f4ba4b08af728cd9f81ef19895dbffcbca7f283efb371fd5f277f26"
     volumes:
-      # Fichiers uploadés (photos employés, documents) persistants
       - ageo-uploads:/app/server/uploads
+    expose:
+      - "3001"
+    restart: unless-stopped
+
+  # ── Reverse proxy Nginx ───────────────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: ageo-nginx
+    depends_on:
+      - app
     ports:
-      # Port accessible depuis le réseau local
-      - "3001:3001"
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - ageo-nginx-logs:/var/log/nginx
     restart: unless-stopped
 
 volumes:
   ageo-mysql-data:
   ageo-uploads:
+  ageo-nginx-logs:

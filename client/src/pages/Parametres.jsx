@@ -1,15 +1,19 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Building2, SlidersHorizontal, FileText, Tag, Briefcase, ShieldCheck,
   KeyRound, Database, Info, Save, Plus, Pencil, Trash2, RefreshCw, UserPlus,
-  Copy, Check, Sparkles,
+  Copy, Check, Sparkles, Palette, Moon, Sun, Type, Download, Upload, AlertTriangle,
+  Mail, MessageCircle, LifeBuoy,
 } from 'lucide-react'
 import api, { formatMoney, formatDate } from '../lib/api'
 import { useSettings } from '../context/Settings'
 import { useAuth } from '../context/Auth'
+import { useTheme, BRAND_PRESETS, FONT_PRESETS, THEME_PRESETS } from '../context/Theme'
 import { Modal, Spinner, Badge, useToast } from '../components/ui'
+import { useLocation } from 'react-router-dom'
 
 const SECTIONS = [
+  { key: 'apparence', label: 'Apparence', icon: Palette },
   { key: 'entreprise', label: 'Entreprise', icon: Building2 },
   { key: 'preferences', label: 'Préférences', icon: SlidersHorizontal },
   { key: 'facture', label: 'Modèle facture', icon: FileText },
@@ -24,31 +28,31 @@ const SECTIONS = [
 export default function Parametres() {
   const { isAdmin, user } = useAuth()
   const isSuperAdmin = user?.role === 'super_admin'
-  const [section, setSection] = useState('entreprise')
+  const location = useLocation()
+  const initialSection = location.state?.section || 'entreprise'
+  const [section, setSection] = useState(initialSection)
   const visible = SECTIONS.filter((s) => (!s.admin || isAdmin) && (!s.superAdmin || isSuperAdmin))
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[240px_1fr]">
-      <aside className="card h-fit p-3">
-        <p className="px-2 py-2 text-xs font-semibold uppercase tracking-widest text-slate-400">Paramètres</p>
-        <nav className="space-y-1">
-          {visible.map((s) => (
-            <button key={s.key} onClick={() => setSection(s.key)}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition
-                ${section === s.key ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-50'}`}>
-              <s.icon size={17} /> {s.label}
-            </button>
-          ))}
-        </nav>
-      </aside>
+    <div className="space-y-5">
+      <div className="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-white p-1.5">
+        {visible.map((s) => (
+          <button key={s.key} onClick={() => setSection(s.key)}
+            className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition
+              ${section === s.key ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'}`}>
+            <s.icon size={16} /> {s.label}
+          </button>
+        ))}
+      </div>
       <div>
+        {section === 'apparence' && <Apparence />}
         {section === 'entreprise' && <Entreprise />}
         {section === 'preferences' && <Preferences />}
         {section === 'facture' && <ModeleFacture />}
         {section === 'categories' && <Categories />}
         {section === 'departements' && <Departements />}
         {section === 'securite' && <Securite />}
-        {section === 'licence' && <Licence />}
+        {section === 'licence' && <Licence onNavigate={setSection} />}
         {section === 'database' && <BaseDonnees />}
         {section === 'apropos' && <APropos />}
       </div>
@@ -59,8 +63,118 @@ export default function Parametres() {
 function SectionHeader({ title, desc }) {
   return (
     <div className="mb-5">
-      <h2 className="text-xl font-bold text-slate-900">{title}</h2>
-      {desc && <p className="text-sm text-slate-400">{desc}</p>}
+      <h2 className="text-xl font-bold" style={{ color: 'rgb(var(--text-primary))' }}>{title}</h2>
+      {desc && <p className="text-sm" style={{ color: 'rgb(var(--text-muted))' }}>{desc}</p>}
+    </div>
+  )
+}
+
+/* ── Apparence ─────────────────────────────────────────────────────────── */
+function Apparence() {
+  const { mode, setMode, brand, setBrand, font, setFont } = useTheme()
+
+  const themePreviews = {
+    light:      { bg: '#f8fafc', surface: '#ffffff', accent: 'rgb(79 70 229)', text: '#1e293b' },
+    dark:       { bg: '#0f172a', surface: '#1e293b', accent: 'rgb(129 140 248)', text: '#e2e8f0' },
+    'blue-night': { bg: '#080f23', surface: '#0f1937', accent: 'rgb(129 140 248)', text: '#c8dcff' },
+    sepia:      { bg: '#f3e9d8', surface: '#fcf5e7', accent: 'rgb(79 70 229)', text: '#4a3420' },
+  }
+
+  return (
+    <div className="space-y-5">
+      <SectionHeader title="Apparence" desc="Personnalisez le thème, les couleurs et la police de l'application." />
+
+      {/* Thème */}
+      <div className="card p-5">
+        <div className="mb-4 flex items-center gap-3">
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-500/15 text-brand-400">
+            <Palette size={20} />
+          </span>
+          <div>
+            <p className="font-semibold" style={{ color: 'rgb(var(--text-primary))' }}>Thème de l'interface</p>
+            <p className="text-sm" style={{ color: 'rgb(var(--text-muted))' }}>Choisissez le thème global de l'application</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {THEME_PRESETS.map((t) => {
+            const p = themePreviews[t.key]
+            const active = mode === t.key
+            return (
+              <button key={t.key} onClick={() => setMode(t.key)}
+                className="overflow-hidden rounded-xl border-2 transition"
+                style={{
+                  borderColor: active ? 'rgb(var(--brand-600))' : 'rgb(var(--border))',
+                  background: active ? 'rgb(var(--brand-500) / 0.08)' : 'transparent',
+                }}>
+                <div className="flex items-center gap-2 px-3 py-2.5" style={{ background: p.bg }}>
+                  <div className="flex flex-1 items-center gap-2">
+                    <div className="h-8 w-8 rounded-lg" style={{ background: p.surface, border: `1px solid ${p.accent}30` }} />
+                    <div className="flex flex-1 flex-col gap-1">
+                      <div className="h-1.5 w-full rounded-full" style={{ background: p.accent, opacity: 0.6 }} />
+                      <div className="h-1.5 w-2/3 rounded-full" style={{ background: p.text, opacity: 0.3 }} />
+                    </div>
+                  </div>
+                  {t.icon === 'moon' ? <Moon size={14} style={{ color: p.text }} /> : <Sun size={14} style={{ color: p.text }} />}
+                </div>
+                <p className="py-2 text-center text-xs font-semibold" style={{ color: active ? 'rgb(var(--brand-600))' : 'rgb(var(--text-secondary))' }}>{t.label}</p>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Couleur principale */}
+      <div className="card p-5">
+        <div className="mb-4 flex items-center gap-3">
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-500/15 text-brand-400">
+            <Palette size={20} />
+          </span>
+          <div>
+            <p className="font-semibold" style={{ color: 'rgb(var(--text-primary))' }}>Couleur principale</p>
+            <p className="text-sm" style={{ color: 'rgb(var(--text-muted))' }}>Choisissez la couleur d'accent de l'application</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-4 gap-3 sm:grid-cols-8">
+          {Object.entries(BRAND_PRESETS).map(([key, preset]) => (
+            <button key={key} onClick={() => setBrand(key)}
+              className={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition`}
+              style={{
+                borderColor: brand === key ? `rgb(var(--brand-600))` : 'rgb(var(--border))',
+                background: brand === key ? 'rgb(var(--brand-500) / 0.1)' : 'transparent',
+              }}>
+              <span className="h-8 w-8 rounded-full" style={{ background: `rgb(${preset.vars[600]})` }} />
+              <span className="text-xs font-medium" style={{ color: 'rgb(var(--text-secondary))' }}>{preset.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Police d'écriture */}
+      <div className="card p-5">
+        <div className="mb-4 flex items-center gap-3">
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-500/15 text-brand-400">
+            <Type size={20} />
+          </span>
+          <div>
+            <p className="font-semibold" style={{ color: 'rgb(var(--text-primary))' }}>Police d'écriture</p>
+            <p className="text-sm" style={{ color: 'rgb(var(--text-muted))' }}>Choisissez la police de l'interface</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+          {FONT_PRESETS.map((f) => (
+            <button key={f.key} onClick={() => setFont(f.key)}
+              className={`rounded-xl border-2 p-4 text-center transition`}
+              style={{
+                borderColor: font === f.key ? 'rgb(var(--brand-600))' : 'rgb(var(--border))',
+                background: font === f.key ? 'rgb(var(--brand-500) / 0.1)' : 'transparent',
+                fontFamily: `'${f.key}', system-ui, sans-serif`,
+              }}>
+              <p className="text-base font-bold" style={{ color: 'rgb(var(--text-primary))' }}>{f.label}</p>
+              <p className="mt-1 text-xs" style={{ color: 'rgb(var(--text-muted))' }}>Aa Bb Cc 123</p>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
@@ -111,7 +225,7 @@ function Entreprise() {
           </div>
           <label className="flex-1 cursor-pointer rounded-xl border-2 border-dashed border-slate-200 px-6 py-8 text-center hover:border-brand-300">
             <input type="file" accept="image/*" className="hidden" onChange={onLogo} />
-            <span className="font-semibold text-brand-700">Cliquez</span> <span className="text-slate-500">ou glissez une image ici</span>
+            <span className="font-semibold text-brand-600">Cliquez</span> <span className="text-slate-500">ou glissez une image ici</span>
             <p className="mt-1 text-xs text-slate-400">PNG, JPG, SVG, WebP — max 5 Mo</p>
           </label>
         </div>
@@ -126,7 +240,7 @@ function Entreprise() {
           </div>
           <label className="flex-1 cursor-pointer rounded-xl border-2 border-dashed border-slate-200 px-6 py-8 text-center hover:border-brand-300">
             <input type="file" accept="image/*" className="hidden" onChange={onSignature} />
-            <span className="font-semibold text-brand-700">Cliquez</span> <span className="text-slate-500">ou glissez une image ici</span>
+            <span className="font-semibold text-brand-600">Cliquez</span> <span className="text-slate-500">ou glissez une image ici</span>
             <p className="mt-1 text-xs text-slate-400">PNG, JPG, SVG, WebP — max 5 Mo</p>
           </label>
         </div>
@@ -206,7 +320,7 @@ function ModeleFacture() {
   const submit = async () => {
     try {
       await save({
-        couleur_principale: form.couleur_principale || '#d6d6d1', couleur_sombre: form.couleur_sombre || '#2992f5',
+        couleur_principale: form.couleur_principale || '#1e293b', couleur_sombre: form.couleur_sombre || '#2992f5',
         siret: form.siret || '', message_remerciement: form.message_remerciement || '',
         coordonnees_bancaires: form.coordonnees_bancaires || '', mentions_legales: form.mentions_legales || '',
       })
@@ -219,7 +333,7 @@ function ModeleFacture() {
       <div className="card space-y-4 p-5">
         <p className="text-xs font-semibold uppercase text-slate-500">En-tête</p>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div><label className="label">Couleur principale</label><div className="flex items-center gap-2"><input type="color" className="h-10 w-14 rounded border border-slate-200" value={form.couleur_principale || '#d6d6d1'} onChange={(e) => setForm({ ...form, couleur_principale: e.target.value })} /><input className="input" value={form.couleur_principale || '#d6d6d1'} onChange={(e) => setForm({ ...form, couleur_principale: e.target.value })} /></div></div>
+          <div><label className="label">Couleur principale</label><div className="flex items-center gap-2"><input type="color" className="h-10 w-14 rounded border border-slate-200" value={form.couleur_principale || '#1e293b'} onChange={(e) => setForm({ ...form, couleur_principale: e.target.value })} /><input className="input" value={form.couleur_principale || '#1e293b'} onChange={(e) => setForm({ ...form, couleur_principale: e.target.value })} /></div></div>
           <div><label className="label">Couleur sombre (barres & badges)</label><div className="flex items-center gap-2"><input type="color" className="h-10 w-14 rounded border border-slate-200" value={form.couleur_sombre || '#2992f5'} onChange={(e) => setForm({ ...form, couleur_sombre: e.target.value })} /><input className="input" value={form.couleur_sombre || '#2992f5'} onChange={(e) => setForm({ ...form, couleur_sombre: e.target.value })} /></div></div>
         </div>
         <div><label className="label">SIRET / N° RCCM / Identifiant fiscal</label><input className="input" value={form.siret || ''} onChange={(e) => setForm({ ...form, siret: e.target.value })} placeholder="SIRET : 123 456 789 00010" /></div>
@@ -254,7 +368,7 @@ function Categories() {
         <button type="submit" className="btn-primary"><Plus size={17} /> Ajouter</button>
       </form>
       <div className="card overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3"><p className="text-xs font-semibold uppercase text-slate-500">{items.length} catégorie(s)</p><button onClick={load} className="flex items-center gap-1 text-sm text-slate-500 hover:text-brand-700"><RefreshCw size={14} /> Actualiser</button></div>
+        <div className="flex items-center justify-between px-5 py-3"><p className="text-xs font-semibold uppercase text-slate-500">{items.length} catégorie(s)</p><button onClick={load} className="flex items-center gap-1 text-sm text-slate-500 hover:text-brand-600"><RefreshCw size={14} /> Actualiser</button></div>
         {loading ? <Spinner /> : (
           <div className="divide-y divide-slate-100">
             {items.map((c) => (
@@ -262,7 +376,7 @@ function Categories() {
                 <span className="grid h-9 w-9 place-items-center rounded-lg bg-violet-100 text-violet-600"><Tag size={16} /></span>
                 <span className="flex-1 font-semibold text-slate-800">{c.nom}</span>
                 <span className="text-sm text-slate-400">{c.nb_produits} produit(s)</span>
-                <button onClick={() => edit(c)} className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-brand-700"><Pencil size={16} /></button>
+                <button onClick={() => edit(c)} className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-brand-600"><Pencil size={16} /></button>
                 <button onClick={() => remove(c)} className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={16} /></button>
               </div>
             ))}
@@ -292,14 +406,14 @@ function Departements() {
         <button type="submit" className="btn-primary"><Plus size={17} /> Ajouter</button>
       </form>
       <div className="card overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3"><p className="text-xs font-semibold uppercase text-slate-500">{items.length} département(s)</p><button onClick={load} className="flex items-center gap-1 text-sm text-slate-500 hover:text-brand-700"><RefreshCw size={14} /> Actualiser</button></div>
+        <div className="flex items-center justify-between px-5 py-3"><p className="text-xs font-semibold uppercase text-slate-500">{items.length} département(s)</p><button onClick={load} className="flex items-center gap-1 text-sm text-slate-500 hover:text-brand-600"><RefreshCw size={14} /> Actualiser</button></div>
         {loading ? <Spinner /> : (
           <div className="divide-y divide-slate-100">
             {items.map((d) => (
               <div key={d.id} className="flex items-center gap-3 px-5 py-3">
                 <span className="grid h-9 w-9 place-items-center rounded-lg bg-violet-100 text-violet-600"><Briefcase size={16} /></span>
                 <span className="flex-1 font-semibold text-slate-800">{d.nom}</span>
-                <button onClick={() => edit(d)} className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-brand-700"><Pencil size={16} /></button>
+                <button onClick={() => edit(d)} className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-brand-600"><Pencil size={16} /></button>
                 <button onClick={() => remove(d)} className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={16} /></button>
               </div>
             ))}
@@ -343,7 +457,7 @@ function Securite() {
   const openEdit = (u) => {
     let perms = []
     try { perms = JSON.parse(u.permissions) || [] } catch { perms = [] }
-    setForm({ username: u.username, email: u.email || '', nom: u.nom, password: '', role: u.role, poste: u.poste || '', permissions: Array.isArray(perms) ? perms : [] })
+    setForm({ username: u.username || '', email: u.email || '', nom: u.nom, password: '', role: u.role, poste: u.poste || '', permissions: Array.isArray(perms) ? perms : [] })
     setEditing(u); setModal(true)
   }
   const toggle = (m) => setForm((f) => ({ ...f, permissions: f.permissions.includes(m) ? f.permissions.filter((x) => x !== m) : [...f.permissions, m] }))
@@ -358,8 +472,14 @@ function Securite() {
   }
   const remove = async (u) => { if (!confirm(`Supprimer ${u.nom} ?`)) return; try { await api.delete(`/parametres/users/${u.id}`); loadUsers() } catch (err) { toast.error(err.response?.data?.error || 'Erreur') } }
 
-  const roleLabel = { super_admin: 'Super Admin', admin: 'Admin', user: 'Utilisateur' }
-  const roleColor = { super_admin: 'bg-violet-100 text-violet-700', admin: 'bg-brand-100 text-brand-700', user: 'bg-slate-100 text-slate-600' }
+  const { user } = useAuth()
+  const isSuperAdmin = user?.role === 'super_admin'
+  const roleLabel = isSuperAdmin
+    ? { super_admin: 'Super Admin', admin: 'Admin', user: 'Utilisateur' }
+    : { admin: 'Admin', user: 'Utilisateur' }
+  const roleColor = isSuperAdmin
+    ? { super_admin: 'bg-violet-500/15 text-violet-400', admin: 'bg-brand-500/15 text-brand-400', user: '' }
+    : { admin: 'bg-brand-500/15 text-brand-400', user: '' }
   const posteLabel = { comptable: 'Comptable', caissier: 'Caissier', commercial: 'Commercial', magasinier: 'Magasinier', rh: 'RH', autre: 'Autre' }
 
   return (
@@ -373,13 +493,14 @@ function Securite() {
         <label className="flex items-center gap-2 text-sm text-slate-600"><input type="checkbox" checked={pwd.show} onChange={(e) => setPwd({ ...pwd, show: e.target.checked })} /> Afficher les mots de passe</label>
         <button type="submit" className="btn-primary w-fit"><Save size={16} /> Modifier le mot de passe</button>
       </form>
-      <div className="card overflow-hidden">
+      <div className="table-wrap">
         <div className="flex items-center justify-between px-5 py-4"><p className="text-xs font-semibold uppercase text-slate-500">Utilisateurs</p><button onClick={openNew} className="btn-secondary py-2"><UserPlus size={15} /> Ajouter</button></div>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-slate-50">
+            <thead>
               <tr>
                 <th className="table-th">Utilisateur</th>
+                <th className="table-th">Identifiant</th>
                 <th className="table-th">Email</th>
                 <th className="table-th">Rôle</th>
                 <th className="table-th">Poste</th>
@@ -388,13 +509,14 @@ function Securite() {
                 <th className="table-th"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {users.map((u) => {
                 let perms = null; try { perms = JSON.parse(u.permissions) } catch { perms = null }
                 const isSA = u.role === 'super_admin'
                 return (
-                  <tr key={u.id} className="hover:bg-slate-50">
-                    <td className="table-td"><div className="flex items-center gap-2"><span className="grid h-8 w-8 place-items-center rounded-full bg-brand-50 text-xs font-bold text-brand-700">{u.nom[0].toUpperCase()}</span><span className="font-semibold text-slate-900">{u.nom}</span></div></td>
+                  <tr key={u.id} className="table-row-hover">
+                    <td className="table-td"><div className="flex items-center gap-2"><span className="grid h-8 w-8 place-items-center rounded-full bg-brand-50 text-xs font-bold text-brand-600">{u.nom[0].toUpperCase()}</span><span className="font-semibold text-slate-800">{u.nom}</span></div></td>
+                    <td className="table-td font-mono text-xs text-slate-500">{u.username}</td>
                     <td className="table-td font-mono text-xs text-slate-500">{u.email}</td>
                     <td className="table-td"><span className={`badge ${roleColor[u.role]}`}>{roleLabel[u.role]}</span></td>
                     <td className="table-td text-sm text-slate-600">{u.poste ? (posteLabel[u.poste] || u.poste) : '—'}</td>
@@ -402,8 +524,8 @@ function Securite() {
                     <td className="table-td"><Badge status={u.actif ? 'actif' : 'inactif'} /></td>
                     <td className="table-td">
                       <div className="flex justify-end gap-1">
-                        {!isSA && <button onClick={() => openEdit(u)} className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-brand-700"><Pencil size={16} /></button>}
-                        {!isSA && <button onClick={() => remove(u)} className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={16} /></button>}
+                        <button onClick={() => openEdit(u)} className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-brand-600"><Pencil size={16} /></button>
+                        {u.id !== user?.id && <button onClick={() => remove(u)} className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={16} /></button>}
                       </div>
                     </td>
                   </tr>
@@ -418,11 +540,13 @@ function Securite() {
         <form onSubmit={submit} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div><label className="label">Nom complet</label><input className="input" required value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} /></div>
-            <div><label className="label">Email</label><input type="email" className="input" required disabled={!!editing} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
+            <div><label className="label">Nom d'utilisateur</label><input className="input" required value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} placeholder="admin" /></div>
           </div>
+          <div><label className="label">Email</label><input type="email" className="input" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="vous@entreprise.com" /></div>
           <div><label className="label">Mot de passe {editing && <span className="text-xs font-normal text-slate-400">(laisser vide pour ne pas changer)</span>}</label><input type="password" className="input" required={!editing} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></div>
           <div><label className="label">Rôle</label>
-            <select className="input" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
+            <select className="input" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} disabled={editing?.role === 'super_admin'}>
+              {isSuperAdmin && <option value="super_admin">Super Admin</option>}
               <option value="user">Utilisateur</option><option value="admin">Admin</option>
             </select>
           </div>
@@ -438,7 +562,7 @@ function Securite() {
                 <label className="label">Modules autorisés</label>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {MODULES.map((m) => (
-                    <label key={m} className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm capitalize ${form.permissions.includes(m) ? 'border-brand-400 bg-brand-50 text-brand-700' : 'border-slate-200 text-slate-600'}`}>
+                    <label key={m} className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm capitalize ${form.permissions.includes(m) ? 'border-brand-400 bg-brand-50 text-brand-600' : 'border-slate-200 text-slate-600'}`}>
                       <input type="checkbox" checked={form.permissions.includes(m)} onChange={() => toggle(m)} /> {m}
                     </label>
                   ))}
@@ -447,7 +571,7 @@ function Securite() {
               <label className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-semibold ${form.permissions.includes('can_delete') ? 'border-red-400 bg-red-50 text-red-700' : 'border-slate-200 text-slate-600'}`}>
                 <input type="checkbox" checked={form.permissions.includes('can_delete')} onChange={() => toggle('can_delete')} /> Droit de suppression (toutes les données)
               </label>
-              <label className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-semibold ${form.permissions.includes('can_print') ? 'border-brand-400 bg-brand-50 text-brand-700' : 'border-slate-200 text-slate-600'}`}>
+              <label className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-semibold ${form.permissions.includes('can_print') ? 'border-brand-400 bg-brand-50 text-brand-600' : 'border-slate-200 text-slate-600'}`}>
                 <input type="checkbox" checked={form.permissions.includes('can_print')} onChange={() => toggle('can_print')} /> Droit d'impression (factures, reçus, états de caisse)
               </label>
             </>
@@ -460,18 +584,51 @@ function Securite() {
 }
 
 /* ── Licence ────────────────────────────────────────────────────────────── */
-function Licence() {
+function Licence({ onNavigate }) {
   const { user } = useAuth()
   const isSuperAdmin = user?.role === 'super_admin'
   const toast = useToast()
   const [info, setInfo] = useState(null)
-  useEffect(() => { api.get('/licence/info').then(({ data }) => setInfo(data)).catch(() => setInfo(null)) }, [])
+  const reloadInfo = () => api.get('/licence/info').then(({ data }) => setInfo(data)).catch(() => setInfo(null))
+  useEffect(() => { reloadInfo() }, [])
 
-  // Licence generation form
+  // Licence management form (apply/renew directly)
+  const [manageForm, setManageForm] = useState({ entreprise: '', expiration: '', max_users: '' })
+  const [applying, setApplying] = useState(false)
+
+  // Licence generation form (for other installations)
   const [form, setForm] = useState({ entreprise: '', expiration: '', max_users: '', modules: 'all' })
   const [generated, setGenerated] = useState(null)
   const [copied, setCopied] = useState(false)
   const [generating, setGenerating] = useState(false)
+
+  const doApply = async (e) => {
+    e.preventDefault()
+    if (!manageForm.expiration) return
+    setApplying(true)
+    try {
+      const payload = { expiration: manageForm.expiration }
+      if (manageForm.entreprise) payload.entreprise = manageForm.entreprise
+      if (manageForm.max_users) payload.max_users = parseInt(manageForm.max_users, 10)
+      await api.post('/licence/apply', payload)
+      toast.success('Licence appliquée avec succès')
+      setManageForm({ entreprise: '', expiration: '', max_users: '' })
+      reloadInfo()
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Erreur lors de l\'application de la licence')
+    } finally { setApplying(false) }
+  }
+
+  const doRemove = async () => {
+    if (!confirm('Supprimer la licence ? L\'application repassera en mode interne.')) return
+    try {
+      await api.delete('/licence/apply')
+      toast.success('Licence supprimée')
+      reloadInfo()
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Erreur')
+    }
+  }
 
   const doGenerate = async (e) => {
     e.preventDefault()
@@ -487,9 +644,7 @@ function Licence() {
       toast.success('Licence générée avec succès')
     } catch (err) {
       toast.error(err.response?.data?.error || 'Erreur lors de la génération')
-    } finally {
-      setGenerating(false)
-    }
+    } finally { setGenerating(false) }
   }
 
   const copyKey = () => {
@@ -509,7 +664,7 @@ function Licence() {
   ]
   return (
     <div className="space-y-5">
-      <SectionHeader title="Licence" desc="Informations sur la licence logicielle." />
+      <SectionHeader title="Licence" desc="Gérez la licence de cette installation." />
       <div className="card overflow-hidden">
         <div className={`flex items-center justify-between px-5 py-4 ${info.valid ? 'bg-emerald-50' : 'bg-red-50'}`}>
           <span className="flex items-center gap-2 font-semibold">
@@ -517,26 +672,97 @@ function Licence() {
             {info.valid ? 'Licence active' : (info.expired ? 'Licence expirée' : 'Licence invalide')}
           </span>
           {info.jours_restants != null && info.jours_restants <= 30 && info.valid && (
-            <span className="text-sm font-medium text-amber-600">Expire dans {info.jours_restants} jour(s)</span>
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-amber-600">Expire dans {info.jours_restants} jour(s)</span>
+              {!isSuperAdmin && (
+                <button type="button" onClick={() => onNavigate?.('apropos')} className="btn-secondary py-1.5 text-xs">
+                  <LifeBuoy size={14} /> Renouveler
+                </button>
+              )}
+            </div>
           )}
         </div>
         <div className="divide-y divide-slate-100">
           {rows.map(([k, v]) => (
-            <div key={k} className="flex justify-between px-5 py-3.5"><span className="text-slate-500">{k}</span><span className="font-semibold text-slate-900">{v}</span></div>
+            <div key={k} className="flex justify-between px-5 py-3.5"><span className="text-slate-500">{k}</span><span className="font-semibold text-slate-800">{v}</span></div>
           ))}
         </div>
       </div>
       {info.reason && <p className="text-sm text-slate-400">{info.reason}</p>}
 
-      {/* Générateur de licence — super_admin uniquement */}
+      {/* Bouton renouveler pour les non-super_admin — redirige vers le support client */}
+      {!isSuperAdmin && (info.expired || !info.valid) && (
+        <div className="card p-5 space-y-3">
+          <div className="flex items-center gap-2 text-red-700">
+            <AlertTriangle size={18} />
+            <span className="font-semibold">Licence expirée ou invalide</span>
+          </div>
+          <p className="text-sm text-slate-600">
+            Votre licence a expiré. Veuillez contacter le support client pour la renouveler.
+          </p>
+          <button type="button" onClick={() => onNavigate?.('apropos')} className="btn-primary">
+            <LifeBuoy size={16} /> Contacter le support client
+          </button>
+        </div>
+      )}
+
+      {/* Gestion de la licence — super_admin uniquement */}
       {isSuperAdmin && (
         <div className="card overflow-hidden">
-          <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-4 font-bold text-slate-900">
-            <Sparkles size={18} /> Générer une licence
+          <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-4 font-bold text-slate-800">
+            <ShieldCheck size={18} /> Gérer la licence de cette installation
           </div>
           <div className="p-5 space-y-4">
             <p className="text-sm text-slate-500">
-              Générez une clé de licence pour une autre entreprise. La clé utilisera le secret défini dans <code className="rounded bg-slate-100 px-1 text-xs">LICENCE_SECRET</code> du fichier <code className="rounded bg-slate-100 px-1 text-xs">.env</code>.
+              Définissez la durée de la licence pour cette application. À l'expiration, seuls les super administrateurs pourront se connecter pour la renouveler.
+            </p>
+            <form onSubmit={doApply} className="grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className="label">Nom de l'entreprise</label>
+                <input className="input" placeholder="Ex: Mbila Service" value={manageForm.entreprise} onChange={(e) => setManageForm({ ...manageForm, entreprise: e.target.value })} />
+              </div>
+              <div>
+                <label className="label">Date d'expiration *</label>
+                <input type="date" className="input" value={manageForm.expiration} onChange={(e) => setManageForm({ ...manageForm, expiration: e.target.value })} required />
+              </div>
+              <div>
+                <label className="label">Utilisateurs max (vide = illimité)</label>
+                <input type="number" className="input" placeholder="Ex: 10" value={manageForm.max_users} onChange={(e) => setManageForm({ ...manageForm, max_users: e.target.value })} />
+              </div>
+              <div className="sm:col-span-2 flex gap-3">
+                <button type="submit" disabled={applying} className="btn-primary">
+                  <ShieldCheck size={16} /> {applying ? 'Application...' : (info.expired ? 'Renouveler la licence' : 'Appliquer / Renouveler')}
+                </button>
+                {info.expiration && (
+                  <button type="button" onClick={doRemove} className="btn-secondary text-red-600 hover:bg-red-50">
+                    Supprimer la licence
+                  </button>
+                )}
+              </div>
+            </form>
+            {info.expired && (
+              <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-4 space-y-3">
+                <p className="text-sm text-red-800">
+                  <b>Licence expirée.</b> Les utilisateurs normaux ne peuvent plus se connecter. Renouvelez la licence pour rétablir l'accès.
+                </p>
+                <button type="button" onClick={() => onNavigate?.('apropos')} className="btn-secondary text-sm py-2">
+                  <LifeBuoy size={15} /> Contacter le support client
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Générateur de licence pour autres installations — super_admin uniquement */}
+      {isSuperAdmin && (
+        <div className="card overflow-hidden">
+          <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-4 font-bold text-slate-800">
+            <Sparkles size={18} /> Générer une licence pour une autre installation
+          </div>
+          <div className="p-5 space-y-4">
+            <p className="text-sm text-slate-500">
+              Générez une clé de licence pour une autre machine. La clé utilisera le secret défini dans <code className="rounded bg-slate-100 px-1 text-xs">LICENCE_SECRET</code>.
             </p>
             <form onSubmit={doGenerate} className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
@@ -556,8 +782,8 @@ function Licence() {
                 <input className="input" placeholder="all" value={form.modules} onChange={(e) => setForm({ ...form, modules: e.target.value })} />
               </div>
               <div className="sm:col-span-2">
-                <button type="submit" disabled={generating} className="btn-primary">
-                  <KeyRound size={16} /> {generating ? 'Génération...' : 'Générer la licence'}
+                <button type="submit" disabled={generating} className="btn-secondary">
+                  <KeyRound size={16} /> {generating ? 'Génération...' : 'Générer la clé'}
                 </button>
               </div>
             </form>
@@ -565,16 +791,12 @@ function Licence() {
             {generated && (
               <div className="rounded-lg border-2 border-brand-200 bg-brand-50 p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-brand-700">Clé de licence générée</span>
+                  <span className="text-sm font-bold text-brand-600">Clé de licence générée</span>
                   <button onClick={copyKey} className="btn-secondary py-1.5 text-xs">
                     {copied ? <><Check size={14} /> Copié !</> : <><Copy size={14} /> Copier</>}
                   </button>
                 </div>
                 <textarea readOnly className="w-full rounded-lg border border-brand-200 bg-white p-3 font-mono text-xs text-slate-700" rows={4} value={generated} onClick={(e) => e.target.select()} />
-                <p className="text-xs text-slate-500">
-                  Copiez cette clé et ajoutez-la dans le fichier <code className="rounded bg-white px-1">.env</code> de l'installation client :
-                  <code className="mt-1 block rounded bg-white px-2 py-1 text-xs">LICENCE_KEY={generated.slice(0, 40)}...</code>
-                </p>
               </div>
             )}
           </div>
@@ -586,10 +808,65 @@ function Licence() {
 
 /* ── Base de données ────────────────────────────────────────────────────── */
 function BaseDonnees() {
-  const { devise } = useSettings()
+  const { devise, reload: reloadSettings } = useSettings()
+  const toast = useToast()
   const [data, setData] = useState(null)
+  const [exporting, setExporting] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [showRestoreConfirm, setShowRestoreConfirm] = useState(false)
+  const [pendingFile, setPendingFile] = useState(null)
+  const fileRef = useRef(null)
   const load = () => api.get('/parametres/database').then(({ data }) => setData(data)).catch(() => setData(null))
   useEffect(() => { load() }, [])
+
+  const doExport = async () => {
+    setExporting(true)
+    try {
+      const resp = await api.get('/parametres/backup', { responseType: 'blob' })
+      const url = window.URL.createObjectURL(new Blob([resp.data]))
+      const a = document.createElement('a')
+      a.href = url
+      const disposition = resp.headers['content-disposition'] || ''
+      const match = disposition.match(/filename="([^"]+)"/)
+      a.download = match ? match[1] : `sauvegarde_${new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-')}.bak`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+      toast.success('Sauvegarde téléchargée avec succès')
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Erreur lors de la sauvegarde')
+    } finally { setExporting(false) }
+  }
+
+  const onFileSelected = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    setPendingFile(file)
+    setShowRestoreConfirm(true)
+  }
+
+  const doRestore = async () => {
+    if (!pendingFile) return
+    setImporting(true)
+    try {
+      const text = await pendingFile.text()
+      const json = JSON.parse(text)
+      await api.post('/parametres/restore', json)
+      toast.success('Données restaurées avec succès')
+      setShowRestoreConfirm(false)
+      setPendingFile(null)
+      // Reload settings context so configuration changes are applied
+      await reloadSettings()
+      load()
+      // Full page reload after a short delay to refresh all data across the app
+      setTimeout(() => window.location.reload(), 1500)
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Fichier invalide ou erreur lors de la restauration')
+    } finally { setImporting(false) }
+  }
+
   if (!data) return <Spinner />
   const cards = [
     { label: 'Clients', value: `${data.clients.actifs} / ${data.clients.total}`, sub: 'actifs / total', color: 'bg-brand-100 text-brand-600' },
@@ -602,14 +879,14 @@ function BaseDonnees() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <SectionHeader title="Base de données" desc="Statistiques et informations sur les données stockées." />
+        <SectionHeader title="Base de données" desc="Statistiques, sauvegarde et restauration des données." />
         <button onClick={load} className="btn-secondary py-2"><RefreshCw size={15} /> Actualiser</button>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((c) => (
           <div key={c.label} className="card p-5">
             <span className={`mb-3 grid h-10 w-10 place-items-center rounded-lg ${c.color}`}><Database size={18} /></span>
-            <p className="text-2xl font-bold text-slate-900">{c.value}</p>
+            <p className="text-2xl font-bold text-slate-800">{c.value}</p>
             <p className="text-sm font-medium text-slate-600">{c.label}</p>
             <p className="text-xs text-slate-400">{c.sub}</p>
           </div>
@@ -620,9 +897,54 @@ function BaseDonnees() {
         <div className="flex justify-between text-sm"><span className="text-slate-500">Première commande</span><span className="font-medium">{data.premiere_commande ? formatDate(data.premiere_commande) : '—'}</span></div>
         <div className="flex justify-between text-sm"><span className="text-slate-500">Dernière commande</span><span className="font-medium">{data.derniere_commande ? formatDate(data.derniere_commande) : '—'}</span></div>
       </div>
+
+      {/* Sauvegarde / Restauration */}
+      <div className="card space-y-4 p-5">
+        <div className="flex items-center gap-3">
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-500/15 text-brand-600"><Database size={20} /></span>
+          <div>
+            <p className="font-semibold text-slate-800">Sauvegarde & Restauration</p>
+            <p className="text-sm text-slate-500">Exportez toutes vos données dans un fichier, ou restaurez-les sur cette machine ou une autre.</p>
+          </div>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="rounded-xl border border-slate-200 p-4">
+            <div className="mb-2 flex items-center gap-2 text-slate-700"><Download size={18} className="text-brand-600" /><span className="font-semibold">Exporter les données</span></div>
+            <p className="mb-3 text-xs text-slate-500">Télécharge un fichier contenant toutes les données de l'application (clients, produits, commandes, employés, paie, etc.).</p>
+            <button onClick={doExport} disabled={exporting} className="btn-primary w-full py-2.5">
+              {exporting ? <><RefreshCw size={16} className="animate-spin" /> Export en cours...</> : <><Download size={16} /> Télécharger la sauvegarde</>}
+            </button>
+          </div>
+          <div className="rounded-xl border border-slate-200 p-4">
+            <div className="mb-2 flex items-center gap-2 text-slate-700"><Upload size={18} className="text-violet-600" /><span className="font-semibold">Restaurer les données</span></div>
+            <p className="mb-3 text-xs text-slate-500">Importe un fichier de sauvegarde. <b className="text-red-600">Toutes les données actuelles seront remplacées.</b></p>
+            <input ref={fileRef} type="file" accept=".bak,.json" onChange={onFileSelected} className="hidden" />
+            <button onClick={() => fileRef.current?.click()} disabled={importing} className="btn-secondary w-full py-2.5">
+              {importing ? <><RefreshCw size={16} className="animate-spin" /> Restauration...</> : <><Upload size={16} /> Choisir un fichier</>}
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
         <b>Sauvegarde recommandée</b> — Effectuez des sauvegardes régulières de votre base de données pour protéger vos données.
       </div>
+
+      {/* Modal confirmation restauration */}
+      <Modal open={showRestoreConfirm} onClose={() => { setShowRestoreConfirm(false); setPendingFile(null) }} title="Confirmer la restauration" icon={AlertTriangle} size="sm">
+        <div className="space-y-4">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+            <p className="font-semibold">⚠️ Attention</p>
+            <p className="mt-1">Cette action va <b>remplacer toutes les données actuelles</b> par celles du fichier <b>{pendingFile?.name}</b>. Cette opération est irréversible.</p>
+          </div>
+          <div className="flex justify-end gap-3">
+            <button onClick={() => { setShowRestoreConfirm(false); setPendingFile(null) }} className="btn-secondary py-2">Annuler</button>
+            <button onClick={doRestore} disabled={importing} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">
+              {importing ? <><RefreshCw size={16} className="animate-spin" /> Restauration...</> : 'Confirmer la restauration'}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }
@@ -633,6 +955,19 @@ function APropos() {
   return (
     <div className="space-y-5">
       <SectionHeader title="À propos" desc="Informations sur l'application." />
+      <div className="card p-5">
+        <p className="text-xs font-semibold uppercase text-slate-500">Support client</p>
+        <div className="mt-3 space-y-3">
+          <div className="flex items-center gap-3 text-sm text-slate-700">
+            <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-100 text-brand-600"><Mail size={17} /></span>
+            <a href="mailto:rochrmt55@gmail.com" className="font-medium hover:text-brand-600">rochrmt55@gmail.com</a>
+          </div>
+          <div className="flex items-center gap-3 text-sm text-slate-700">
+            <span className="grid h-9 w-9 place-items-center rounded-lg bg-emerald-100 text-emerald-600"><MessageCircle size={17} /></span>
+            <span className="font-medium">WhatsApp : 72679175</span>
+          </div>
+        </div>
+      </div>
       <div className="card overflow-hidden">
         <div className="flex items-center gap-4 bg-slate-900 px-6 py-6 text-white">
           <span className="grid h-16 w-16 place-items-center overflow-hidden rounded-2xl bg-brand-600 text-2xl font-bold">
@@ -648,14 +983,13 @@ function APropos() {
             ['Licence', 'Usage interne entreprise'],
             ['Année', String(new Date().getFullYear())],
           ].map(([k, v]) => (
-            <div key={k} className="flex justify-between px-6 py-3.5"><span className="text-slate-500">{k}</span><span className="font-semibold text-slate-900">{v}</span></div>
+            <div key={k} className="flex justify-between px-6 py-3.5"><span className="text-slate-500">{k}</span><span className="font-semibold text-slate-800">{v}</span></div>
           ))}
         </div>
       </div>
-      <div className="card p-5">
-        <p className="text-xs font-semibold uppercase text-slate-500">Technologies</p>
-        <p className="mt-2 text-sm text-slate-600">Frontend : React 18 · Vite · Tailwind CSS · React Router v6</p>
-        <p className="text-sm text-slate-600">Backend : Node.js · Express · SQL Server</p>
+      <div className="flex items-center justify-center gap-2 pt-2">
+        <img src="/mbila-logo.png" alt="Mbila Service" className="h-14 w-auto opacity-80" />
+        <span className="text-base text-slate-400">by Mbila Service</span>
       </div>
     </div>
   )

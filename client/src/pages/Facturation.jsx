@@ -237,10 +237,6 @@ export default function Facturation() {
 
   return (
     <div className="space-y-5">
-      <div className="flex justify-end">
-        <button onClick={openNew} className="btn-primary"><Plus size={18} /> Nouveau document</button>
-      </div>
-
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total documents" value={stats.total} icon={FileText} color="slate" />
         <StatCard label="Bons de livraison" value={stats.bl} icon={Truck} color="orange" />
@@ -248,46 +244,47 @@ export default function Facturation() {
         <StatCard label="CA encaissé" value={formatMoney(stats.encaisse, devise)} color="green" />
       </div>
 
-      <div className="card overflow-hidden">
+      <div className="table-wrap">
         <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 px-4 py-3">
           {TABS.map((t) => (
             <button key={t.key} onClick={() => setTab(t.key)}
               className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition
-                ${tab === t.key ? 'bg-brand-700 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>{t.label}</button>
+                ${tab === t.key ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>{t.label}</button>
           ))}
           <div className="relative ml-auto min-w-[200px]">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input className="input pl-9 py-2" placeholder="N° document, client..." value={q} onChange={(e) => setQ(e.target.value)} />
           </div>
+          <button onClick={openNew} className="btn-primary py-1.5"><Plus size={16} /> Nouveau</button>
         </div>
 
         {loading ? <Spinner /> : filtered.length === 0 ? (
           <EmptyState icon={FileText} title="Aucun document"
-            action={<button onClick={openNew} className="text-sm font-semibold text-brand-700">Créer le premier document</button>} />
+            action={<button onClick={openNew} className="text-sm font-semibold text-brand-600">Créer le premier document</button>} />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-50">
+              <thead>
                 <tr>
                   <th className="table-th">N°</th><th className="table-th">Type</th><th className="table-th">Client</th>
                   <th className="table-th">Émission</th>
                   <th className="table-th text-right">Total TTC</th><th className="table-th">Statut</th><th className="table-th"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {filtered.map((f) => (
-                  <tr key={f.id} className="hover:bg-slate-50">
-                    <td className="table-td font-semibold text-slate-900">{f.numero}</td>
+                  <tr key={f.id} className="table-row-hover">
+                    <td className="table-td font-semibold text-slate-800">{f.numero}</td>
                     <td className="table-td text-slate-600">{docTitle(f.type_document)}</td>
-                    <td className="table-td">{f.client_nom || f.client_nom_libre || '—'}</td>
+                    <td className="table-td text-slate-600">{f.client_nom || f.client_nom_libre || '—'}</td>
                     <td className="table-td text-slate-500">{formatDate(f.date_emission)}</td>
-                    <td className="table-td text-right font-semibold">{formatMoney(f.total_ttc, devise)}</td>
+                    <td className="table-td text-right font-semibold text-slate-800">{formatMoney(f.total_ttc, devise)}</td>
                     <td className="table-td"><Badge status={f.statut} /></td>
                     <td className="table-td">
                       <div className="flex justify-end gap-1">
-                        {canPrint && <button onClick={() => previewExisting(f)} title="Aperçu / Imprimer" className="rounded p-1.5 text-slate-400 hover:bg-brand-50 hover:text-brand-700"><Printer size={15} /></button>}
+                        {canPrint && <button onClick={() => previewExisting(f)} title="Aperçu / Imprimer" className="rounded p-1.5 text-slate-400 hover:bg-brand-50 hover:text-brand-600"><Printer size={15} /></button>}
                         <button onClick={() => openEdit(f)} title="Modifier" className="rounded p-1.5 text-slate-400 hover:bg-amber-50 hover:text-amber-600"><Pencil size={15} /></button>
-                        {f.statut === 'brouillon' && <button onClick={() => setStatut(f, 'emise')} title="Émettre" className="rounded p-1.5 text-slate-400 hover:bg-brand-50 hover:text-brand-700"><Send size={15} /></button>}
+                        {f.statut === 'brouillon' && <button onClick={() => setStatut(f, 'emise')} title="Émettre" className="rounded p-1.5 text-slate-400 hover:bg-brand-50 hover:text-brand-600"><Send size={15} /></button>}
                         {['emise', 'partielle'].includes(f.statut) && <button onClick={() => payer(f)} title="Encaisser" className="rounded p-1.5 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"><CreditCard size={15} /></button>}
                         {canDelete && <button onClick={() => remove(f)} className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={15} /></button>}
                       </div>
@@ -384,7 +381,7 @@ export default function Facturation() {
           {/* Lignes du document */}
           <div className="flex items-center justify-between">
             <label className="label mb-0">Lignes du document</label>
-            <button type="button" onClick={addLigne} className="flex items-center gap-1 text-sm font-semibold text-brand-700"><Plus size={15} /> Ajouter une ligne</button>
+            <button type="button" onClick={addLigne} className="flex items-center gap-1 text-sm font-semibold text-brand-600"><Plus size={15} /> Ajouter une ligne</button>
           </div>
           <div className="overflow-x-auto rounded-lg border border-slate-200">
             <table className="w-full text-sm">
@@ -465,7 +462,7 @@ export default function Facturation() {
                 <div className="flex justify-between border-t border-slate-200 pt-2 font-bold"><span>Total TTC</span><span>{formatMoney(totals.ttc, devise)}</span></div>
                 {totals.remise > 0 && <div className="flex justify-between text-slate-500"><span>Remise</span><span>- {formatMoney(totals.remise, devise)}</span></div>}
                 {totals.avance > 0 && <div className="flex justify-between text-slate-500"><span>Avance</span><span>- {formatMoney(totals.avance, devise)}</span></div>}
-                <div className="flex justify-between border-t border-slate-200 pt-2 text-base font-bold text-brand-700"><span>Net à payer</span><span>{formatMoney(totals.reste, devise)}</span></div>
+                <div className="flex justify-between border-t border-slate-200 pt-2 text-base font-bold text-brand-600"><span>Net à payer</span><span>{formatMoney(totals.reste, devise)}</span></div>
               </div>
             </div>
           )}
@@ -482,7 +479,7 @@ export default function Facturation() {
         <div className="fixed inset-0 z-50 flex flex-col bg-slate-900/60 p-4 sm:p-8" onClick={() => setPreview(null)}>
           <div className="mx-auto flex h-full w-full max-w-4xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
-              <div className="flex items-center gap-2 font-bold text-slate-900"><Eye size={18} /> Aperçu du document</div>
+              <div className="flex items-center gap-2 font-bold text-slate-800"><Eye size={18} /> Aperçu du document</div>
               <div className="flex items-center gap-2">
                 {canPrint && <button onClick={printPreview} className="btn-primary py-2"><Printer size={16} /> Imprimer</button>}
                 <button onClick={() => setPreview(null)} className="btn-secondary py-2">Fermer</button>

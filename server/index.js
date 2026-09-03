@@ -44,8 +44,15 @@ app.use(express.urlencoded({ limit: '15mb', extended: true }))
 app.use('/api/auth', authRoutes)
 
 // Licence info (public — toujours accessible même si licence expirée)
-app.get('/api/licence/info', (_, res) => {
-  const result = verifyLicence(process.env.LICENCE_KEY ?? '')
+app.get('/api/licence/info', async (_, res) => {
+  let dbKey = null
+  try {
+    const database = require('./db/database')
+    const row = await database.getOne("SELECT valeur FROM parametres WHERE cle = 'licence_key'")
+    dbKey = row?.valeur || null
+  } catch {}
+  const key = dbKey || process.env.LICENCE_KEY || ''
+  const result = verifyLicence(key)
   res.json({
     valid:          result.valid,
     expired:        result.expired ?? false,
@@ -84,6 +91,70 @@ app.post('/api/licence/generate', (req, res) => {
     res.json({ key })
   } catch (err) {
     res.status(500).json({ error: 'Erreur lors de la génération de la licence' })
+  }
+})
+
+// Apply a licence key to this installation (super_admin only) — stores in DB
+app.post('/api/licence/apply', async (req, res) => {
+  if (!req.user || req.user.role !== 'super_admin') {
+    return res.status(403).json({ error: 'Accès réservé au super administrateur' })
+  }
+  try {
+    const { entreprise, expiration, max_users, modules } = req.body || {}
+    if (!expiration) {
+      return res.status(400).json({ error: 'La date d\'expiration est requise' })
+    }
+    // Generate the licence key
+    const key = generateLicence({
+      entreprise: entreprise || req.user.nom || 'Entreprise',
+      expiration,
+      max_users: max_users || null,
+      modules: modules || ['all'],
+    })
+    // Store in DB
+    const database = require('./db/database')
+    const exists = await database.getOne("SELECT 1 AS f FROM parametres WHERE cle = 'licence_key'")
+    if (exists) {
+      await database.run("UPDATE parametres SET valeur = ? WHERE cle = 'licence_key'", [key])
+    } else {
+      await database.run("INSERT INTO parametres (cle, valeur) VALUES ('licence_key', ?)", [key])
+    }
+    // Invalidate cache
+    const licenceCheck = require('./middleware/licenceCheck')
+    if (licenceCheck.invalidateCache) licenceCheck.invalidateCache()
+
+    const result = verifyLicence(key)
+    await require('./utils/journal').log(req, {
+      module: 'Licence',
+      action: 'Application',
+      description: `Licence appliquée : ${entreprise || 'Entreprise'} — expire le ${expiration}`,
+    })
+    res.json({
+      ok: true,
+      valid: result.valid,
+      expired: result.expired ?? false,
+      expiration: result.payload?.expiration,
+      jours_restants: result.daysLeft,
+    })
+  } catch (err) {
+    console.error('[AGEO] licence/apply:', err.message)
+    res.status(500).json({ error: 'Erreur lors de l\'application de la licence' })
+  }
+})
+
+// Remove licence (super_admin only) — reverts to internal mode
+app.delete('/api/licence/apply', async (req, res) => {
+  if (!req.user || req.user.role !== 'super_admin') {
+    return res.status(403).json({ error: 'Accès réservé au super administrateur' })
+  }
+  try {
+    const database = require('./db/database')
+    await database.run("DELETE FROM parametres WHERE cle = 'licence_key'")
+    const licenceCheck = require('./middleware/licenceCheck')
+    if (licenceCheck.invalidateCache) licenceCheck.invalidateCache()
+    res.json({ ok: true })
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur' })
   }
 })
 

@@ -15,6 +15,8 @@ const DEFAULTS = {
   tva_defaut: '19',
   stock_min_defaut: '5',
   delai_livraison: '7',
+  couleur_principale: '#1e293b',
+  couleur_sombre: '#2992f5',
 }
 
 export function SettingsProvider({ children }) {
@@ -43,7 +45,7 @@ export function SettingsProvider({ children }) {
   }, [])
 
   // Nom d'application affiché : raison sociale si définie, sinon libellé neutre
-  const appName = settings.raison_sociale?.trim() || 'Gestion'
+  const appName = settings.raison_sociale?.trim() || 'Mbila Gestion'
   const devise = settings.devise || 'FCFA'
 
   return (

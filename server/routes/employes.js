@@ -75,13 +75,24 @@ router.put('/:id', async (req, res) => {
 // DELETE /api/employes/:id
 router.delete('/:id', async (req, res) => {
   try {
-    await db.run('DELETE FROM employes WHERE id = ?', [req.params.id])
-    await log(req, { module: 'Personnel', action: 'Suppression', description: `Employé #${req.params.id} supprimé` })
+    const id = req.params.id
+    // Delete related records that lack ON DELETE CASCADE
+    await db.run('DELETE FROM bulletins_paie WHERE employe_id = ?', [id])
+    // conges and documents_employes have ON DELETE CASCADE, but delete explicitly to be safe
+    await db.run('DELETE FROM conges WHERE employe_id = ?', [id])
+    await db.run('DELETE FROM documents_employes WHERE employe_id = ?', [id])
+    await db.run('DELETE FROM employes WHERE id = ?', [id])
+    await log(req, { module: 'Personnel', action: 'Suppression', description: `Employé #${id} supprimé` })
     res.json({ ok: true })
   } catch (err) {
-    // Contrainte référentielle (paie/congés) → désactivation
-    await db.run('UPDATE employes SET actif = 0 WHERE id = ?', [req.params.id])
-    res.json({ ok: true, desactive: true })
+    console.error('[AGEO] employes DELETE:', err.message)
+    // Last resort: deactivate
+    try {
+      await db.run('UPDATE employes SET actif = 0 WHERE id = ?', [req.params.id])
+      res.json({ ok: true, desactive: true })
+    } catch {
+      res.status(500).json({ error: 'Erreur lors de la suppression' })
+    }
   }
 })
 

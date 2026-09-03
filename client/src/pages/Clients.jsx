@@ -68,7 +68,7 @@ export default function Clients() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-1">
+      <div className="flex gap-2 rounded-xl border border-slate-200 bg-white p-1.5">
         {[
           { key: 'clients', label: 'Clients', icon: Users },
           { key: 'contrats', label: 'Contrats & Abonnements', icon: FileSignature },
@@ -76,8 +76,8 @@ export default function Clients() {
           const Icon = t.icon
           return (
             <button key={t.key} onClick={() => setView(t.key)}
-              className={`flex items-center gap-2 rounded-t-lg px-4 py-2.5 text-sm font-semibold transition
-                ${view === t.key ? 'bg-white text-brand-700 shadow-[inset_0_-2px_0_0] shadow-brand-600' : 'text-slate-500 hover:text-slate-700'}`}>
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition
+                ${view === t.key ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'}`}>
               <Icon size={16} /> {t.label}
             </button>
           )
@@ -86,6 +86,13 @@ export default function Clients() {
 
       {view === 'contrats' ? <Contrats clients={clients} /> : (
       <>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Total clients" value={stats.total} icon={Users} color="slate" />
+        <StatCard label="Actifs" value={stats.actifs} icon={Building2} color="green" />
+        <StatCard label="Avec commandes" value={stats.avecCmd} icon={ShoppingBag} color="brand" />
+        <StatCard label={`CA total (HT)`} value={formatMoney(stats.ca, devise)} icon={Wallet} color="purple" />
+      </div>
+
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[240px]">
           <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -94,36 +101,29 @@ export default function Clients() {
         <button onClick={openNew} className="btn-primary"><UserPlus size={18} /> Nouveau client</button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total clients" value={stats.total} icon={Users} color="slate" />
-        <StatCard label="Actifs" value={stats.actifs} icon={Building2} color="green" />
-        <StatCard label="Avec commandes" value={stats.avecCmd} icon={ShoppingBag} color="brand" />
-        <StatCard label={`CA total (HT)`} value={formatMoney(stats.ca, devise)} icon={Wallet} color="purple" />
-      </div>
-
-      <div className="card overflow-hidden">
+      <div className="table-wrap">
         {loading ? <Spinner /> : filtered.length === 0 ? (
           <EmptyState icon={Users} title="Aucun client trouvé" />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-50">
+              <thead>
                 <tr>
                   <th className="table-th">Code</th><th className="table-th">Client</th><th className="table-th">Contact</th>
                   <th className="table-th">Ville</th><th className="table-th">Commandes</th>
                   <th className="table-th text-right">CA Total (HT)</th><th className="table-th">Statut</th><th className="table-th"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {filtered.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-50">
+                  <tr key={c.id} className="table-row-hover">
                     <td className="table-td text-xs text-slate-400">{c.code}</td>
                     <td className="table-td">
                       <div className="flex items-center gap-3">
-                        <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-600 text-xs font-bold text-white">
+                        <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-50 text-xs font-bold text-brand-600">
                           {c.nom.slice(0, 2).toUpperCase()}
                         </span>
-                        <span className="font-semibold text-slate-900">{c.nom}</span>
+                        <span className="font-semibold text-slate-800">{c.nom}</span>
                       </div>
                     </td>
                     <td className="table-td">
@@ -133,13 +133,13 @@ export default function Clients() {
                         {!c.email && !c.telephone && '—'}
                       </div>
                     </td>
-                    <td className="table-td">{c.ville || '—'}</td>
+                    <td className="table-td text-slate-600">{c.ville || '—'}</td>
                     <td className="table-td text-slate-500">{c.nb_commandes} cmd</td>
-                    <td className="table-td text-right font-semibold">{formatMoney(c.ca_total, devise)}</td>
+                    <td className="table-td text-right font-semibold text-slate-800">{formatMoney(c.ca_total, devise)}</td>
                     <td className="table-td"><Badge status={c.actif ? 'actif' : 'inactif'} /></td>
                     <td className="table-td">
                       <div className="flex justify-end gap-1">
-                        <button onClick={() => openEdit(c)} className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-brand-700"><Pencil size={16} /></button>
+                        <button onClick={() => openEdit(c)} className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-brand-600"><Pencil size={16} /></button>
                         {canDelete && <button onClick={() => remove(c)} className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={16} /></button>}
                       </div>
                     </td>
@@ -189,7 +189,7 @@ export default function Clients() {
               {['client', 'sous-traitant'].map((t) => (
                 <button type="button" key={t} onClick={() => setForm({ ...form, type: t })}
                   className={`rounded-lg border px-4 py-3 text-sm font-semibold capitalize transition
-                    ${form.type === t ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                    ${form.type === t ? 'border-brand-500 bg-brand-50 text-brand-600' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
                   {t === 'client' ? 'Client' : 'Sous-traitant'}
                 </button>
               ))}

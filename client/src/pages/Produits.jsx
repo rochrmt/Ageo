@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import {
-  Package, Plus, BarChart2, Tag, AlertTriangle, Search, Pencil, Trash2, Save,
+  Boxes, Plus, BarChart2, Tag, AlertTriangle, Search, Pencil, Trash2, Save,
 } from 'lucide-react'
 import api, { formatMoney } from '../lib/api'
 import { useSettings } from '../context/Settings'
@@ -62,15 +62,15 @@ export default function Produits() {
     e.preventDefault(); setSaving(true)
     const payload = { ...form, categorie_id: form.categorie_id || null }
     try {
-      if (editing) { await api.put(`/produits/${editing.id}`, { ...payload, actif: editing.actif }); toast.success('Produit modifié') }
-      else { await api.post('/produits', payload); toast.success('Produit créé') }
+      if (editing) { await api.put(`/produits/${editing.id}`, { ...payload, actif: editing.actif }); toast.success('Article modifié') }
+      else { await api.post('/produits', payload); toast.success('Article créé') }
       setModal(false); load()
     } catch (err) { toast.error(err.response?.data?.error || 'Erreur') } finally { setSaving(false) }
   }
 
   const remove = async (p) => {
     if (!confirm(`Supprimer "${p.nom}" ?`)) return
-    try { await api.delete(`/produits/${p.id}`); toast.success('Produit supprimé'); load() }
+    try { await api.delete(`/produits/${p.id}`); toast.success('Article supprimé'); load() }
     catch (err) { toast.error(err.response?.data?.error || 'Erreur') }
   }
 
@@ -78,6 +78,13 @@ export default function Produits() {
 
   return (
     <div className="space-y-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Références" value={stats.refs} icon={Boxes} color="purple" />
+        <StatCard label="Unités en stock" value={stats.stock} icon={BarChart2} color="brand" />
+        <StatCard label="Catégories" value={stats.cats} icon={Tag} color="green" />
+        <StatCard label="Alertes stock" value={stats.alertes} icon={AlertTriangle} color="orange" />
+      </div>
+
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -87,24 +94,17 @@ export default function Produits() {
           <option value="">Toutes catégories</option>
           {categories.map((c) => <option key={c.id} value={c.id}>{c.nom}</option>)}
         </select>
-        <button onClick={openNew} className="btn-primary"><Plus size={18} /> Nouveau produit</button>
+        <button onClick={openNew} className="btn-primary"><Plus size={18} /> Nouvel article</button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Références" value={stats.refs} icon={Package} color="purple" />
-        <StatCard label="Unités en stock" value={stats.stock} icon={BarChart2} color="brand" />
-        <StatCard label="Catégories" value={stats.cats} icon={Tag} color="green" />
-        <StatCard label="Alertes stock" value={stats.alertes} icon={AlertTriangle} color="orange" />
-      </div>
-
-      <div className="card overflow-hidden">
+      <div className="table-wrap">
         {loading ? <Spinner /> : filtered.length === 0 ? (
-          <EmptyState icon={Package} title="Aucun produit trouvé"
-            action={<button onClick={openNew} className="text-sm font-semibold text-brand-700">Ajouter le premier produit</button>} />
+          <EmptyState icon={Boxes} title="Aucun article trouvé"
+            action={<button onClick={openNew} className="text-sm font-semibold text-brand-600">Ajouter le premier article</button>} />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-50">
+              <thead>
                 <tr>
                   <th className="table-th">Référence</th><th className="table-th">Désignation</th><th className="table-th">Catégorie</th>
                   <th className="table-th text-right">Prix HT</th><th className="table-th text-right">Prix TTC</th>
@@ -112,15 +112,15 @@ export default function Produits() {
                   <th className="table-th">Alerte</th><th className="table-th"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {filtered.map((p) => (
-                  <tr key={p.id} className="hover:bg-slate-50">
+                  <tr key={p.id} className="table-row-hover">
                     <td className="table-td text-xs text-slate-400">{p.code}</td>
-                    <td className="table-td font-semibold text-slate-900">{p.nom}</td>
+                    <td className="table-td font-semibold text-slate-800">{p.nom}</td>
                     <td className="table-td text-slate-500">{p.categorie_nom || 'Sans catégorie'}</td>
-                    <td className="table-td text-right">{formatMoney(p.prix_ht, devise)}</td>
-                    <td className="table-td text-right">{formatMoney(ttc(p), devise)}</td>
-                    <td className="table-td text-right font-semibold">{p.stock}</td>
+                    <td className="table-td text-right text-slate-600">{formatMoney(p.prix_ht, devise)}</td>
+                    <td className="table-td text-right text-slate-600">{formatMoney(ttc(p), devise)}</td>
+                    <td className="table-td text-right font-semibold text-slate-800">{p.stock}</td>
                     <td className="table-td text-right text-slate-400">{p.stock_min}</td>
                     <td className="table-td">
                       {p.stock <= p.stock_min
@@ -129,7 +129,7 @@ export default function Produits() {
                     </td>
                     <td className="table-td">
                       <div className="flex justify-end gap-1">
-                        <button onClick={() => openEdit(p)} className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-brand-700"><Pencil size={16} /></button>
+                        <button onClick={() => openEdit(p)} className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-brand-600"><Pencil size={16} /></button>
                         {canDelete && <button onClick={() => remove(p)} className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={16} /></button>}
                       </div>
                     </td>
@@ -141,7 +141,7 @@ export default function Produits() {
         )}
       </div>
 
-      <Modal open={modal} onClose={() => setModal(false)} title={editing ? 'Modifier le produit' : 'Nouveau produit'} icon={Package}>
+      <Modal open={modal} onClose={() => setModal(false)} title={editing ? "Modifier l'article" : 'Nouvel article'} icon={Boxes}>
         <form onSubmit={submit} className="space-y-4">
           <div>
             <label className="label">Désignation <span className="text-red-500">*</span></label>
@@ -186,7 +186,7 @@ export default function Produits() {
           </div>
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={() => setModal(false)} className="btn-secondary flex-1">Annuler</button>
-            <button type="submit" disabled={saving} className="btn-primary flex-1"><Save size={17} /> {editing ? 'Enregistrer' : 'Créer le produit'}</button>
+            <button type="submit" disabled={saving} className="btn-primary flex-1"><Save size={17} /> {editing ? 'Enregistrer' : "Créer l'article"}</button>
           </div>
         </form>
       </Modal>

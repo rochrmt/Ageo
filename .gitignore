@@ -61,6 +61,7 @@ AGEO_deploy/
 *.gif
 *.bmp
 *.webp
+!1606814358-erplain-etat-des-stocks-niveau-de-stocklogicielgestionstock.png
 !client/public/**/*.png
 !client/public/**/*.jpg
 !client/public/**/*.ico

@@ -40,16 +40,14 @@ export default function Ventes() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-bold text-slate-900">Ventes</h2>
-          <p className="text-sm text-slate-400">vs période précédente</p>
-        </div>
+      <div className="flex flex-col items-center gap-3">
+        <h2 className="text-xl font-bold text-slate-800">Ventes</h2>
+        <p className="text-sm text-slate-400">vs période précédente</p>
         <div className="flex rounded-lg border border-slate-200 bg-white p-1">
           {PERIODES.map((p) => (
             <button key={p.key} onClick={() => setPeriode(p.key)}
               className={`rounded-md px-4 py-1.5 text-sm font-semibold transition
-                ${periode === p.key ? 'bg-brand-700 text-white' : 'text-slate-600 hover:bg-slate-50'}`}>
+                ${periode === p.key ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'}`}>
               {p.label}
             </button>
           ))}
@@ -58,19 +56,22 @@ export default function Ventes() {
 
       {loading ? <Spinner /> : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             {cards.map((c) => (
-              <div key={c.label} className="card p-5">
-                <span className={`mb-3 grid h-10 w-10 place-items-center rounded-lg ${c.color}`}><c.icon size={18} /></span>
-                <p className="text-2xl font-bold text-slate-900">{c.value}</p>
-                <p className="text-sm text-slate-400">{c.label}</p>
+              <div key={c.label} className="card p-5 flex flex-col items-center text-center">
+                <span className={`stat-icon mb-3 ${c.color}`}><c.icon size={22} /></span>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{c.label}</p>
+                <p className="mt-1 text-2xl font-bold text-slate-800">{c.value}</p>
               </div>
             ))}
           </div>
 
           <div className="card p-5">
-            <h3 className="mb-4 font-bold text-slate-900">Évolution du CA</h3>
-            <div className="h-80">
+            <div className="text-center">
+              <h3 className="text-base font-bold text-slate-800">Évolution du CA</h3>
+              <p className="text-sm text-slate-400">Tendance sur la période sélectionnée</p>
+            </div>
+            <div className="mt-4 h-80">
               {chart.length === 0 ? (
                 <div className="grid h-full place-items-center text-sm text-slate-400">Aucune donnée pour cette période</div>
               ) : (
@@ -81,7 +82,7 @@ export default function Ventes() {
                     <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false}
                       tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                     <Tooltip formatter={(v) => formatMoney(v, devise)} />
-                    <Bar dataKey="ca" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="ca" fill="#4f46e5" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               )}

@@ -125,8 +125,10 @@ export function buildDocHtml({ doc, lignes, settings, devise, numero }) {
       ${doc.mode_reglement ? `<div><b>Mode de règlement :</b> ${esc(doc.mode_reglement)}</div>` : ''}`
   }
 
+  const couleurPrincipale = settings.couleur_principale || '#1e293b'
+  const couleurSombre = settings.couleur_sombre || '#2992f5'
   const titleClass = isBL ? 'bl' : type === 'facture_proforma' ? 'proforma' : ''
-  const headerBg = isBL ? '#ea580c' : type === 'facture_proforma' ? '#6366f1' : '#1e293b'
+  const headerBg = couleurPrincipale
 
   // Prolongement du tableau : une seule ligne vide sans bordures internes
   const colCount = isBL ? 4 : 6
@@ -137,17 +139,17 @@ export function buildDocHtml({ doc, lignes, settings, devise, numero }) {
 <style>
   @page { size: A4; margin: 10mm; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { font-family: Arial, Helvetica, sans-serif; color: #1e293b; font-size: 10px; line-height: 1.35; }
+  html, body { font-family: Arial, Helvetica, sans-serif; color: #1e293b; font-size: 10px; line-height: 1.35; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { width: 190mm; padding: 0; }
 
   /* ── En-tête ── */
   .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3mm; }
   .logo-block { flex: 1; }
   .logo-block img { max-height: 18mm; max-width: 45mm; object-fit: contain; }
-  .logo-block .company-name { font-size: 15px; font-weight: bold; color: #1e293b; }
+  .logo-block .company-name { font-size: 15px; font-weight: bold; color: ${couleurPrincipale}; }
   .logo-block .slogan { font-size: 8px; color: #64748b; margin-top: 1px; max-width: 55mm; }
   .title-block { text-align: right; }
-  .title-box { display: inline-block; background: ${headerBg}; color: #fff; padding: 4mm 10mm; font-size: 17px; font-weight: bold; letter-spacing: 2px; }
+  .title-box { display: inline-block; background: ${headerBg}; color: #fff; padding: 4mm 10mm; font-size: 17px; font-weight: bold; letter-spacing: 2px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
   /* ── Blocs émetteur / destinataire ── */
   .parties { display: flex; gap: 4mm; margin-top: 3mm; }
@@ -164,7 +166,7 @@ export function buildDocHtml({ doc, lignes, settings, devise, numero }) {
 
   /* ── Tableau : largeur 190mm, lignes hautes ── */
   table { width: 190mm; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
-  thead th { background: ${headerBg}; color: #fff; padding: 2.5mm 3.5mm; text-align: left; font-weight: bold; font-size: 9px; text-transform: uppercase; letter-spacing: .5px; border: 1px solid ${headerBg}; }
+  thead th { background: ${headerBg}; color: #fff; padding: 2.5mm 3.5mm; text-align: left; font-weight: bold; font-size: 9px; text-transform: uppercase; letter-spacing: .5px; border: 1px solid ${headerBg}; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   tbody td { border: 1px solid #cbd5e1; padding: 3mm 3.5mm; vertical-align: middle; height: 12mm; }
   tbody tr:nth-child(even) td { background: #f8fafc; }
   tbody tr.empty td { border-left: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1; border-top: none; border-bottom: 1px solid #cbd5e1; height: 40mm; }
@@ -178,7 +180,7 @@ export function buildDocHtml({ doc, lignes, settings, devise, numero }) {
 
   .totaux-box { border: 1px solid #cbd5e1; padding: 2.5mm 4mm; }
   .totaux-row { display: flex; justify-content: space-between; padding: 1.2mm 0; font-size: 9px; border-bottom: 1px solid #f1f5f9; }
-  .totaux-row.total { font-size: 10px; font-weight: bold; border-top: 2px solid #1e293b; border-bottom: 2px solid #1e293b; padding: 1.5mm 0; margin-top: 1mm; }
+  .totaux-row.total { font-size: 10px; font-weight: bold; border-top: 2px solid ${couleurPrincipale}; border-bottom: 2px solid ${couleurPrincipale}; padding: 1.5mm 0; margin-top: 1mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .totaux-row.net { font-size: 11px; font-weight: bold; color: #047857; border-bottom: none; padding-top: 1.5mm; }
 
   .conditions-inline { font-size: 9px; line-height: 1.6; padding: 3mm 4mm; background: #f8fafc; border: 1px solid #e2e8f0; }
@@ -192,8 +194,8 @@ export function buildDocHtml({ doc, lignes, settings, devise, numero }) {
   .sign-box { display: block; width: 100%; border: 1px dashed #94a3b8; padding: 8mm 4mm; min-height: 12mm; font-style: italic; color: #475569; font-size: 9px; }
 
   /* ── Footer ── */
-  .footer { position: fixed; bottom: 0; left: 0; right: 0; border-top: 1px solid #cbd5e1; padding: 2mm 10mm; font-size: 8px; color: #64748b; text-align: center; background: #fff; }
-  @media print { body { width: auto; } .footer { padding: 2mm 10mm; } }
+  .footer { position: fixed; bottom: 0; left: 0; right: 0; border-top: 1px solid #cbd5e1; padding: 2mm 10mm; font-size: 8px; color: #64748b; text-align: center; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @media print { body { width: auto; -webkit-print-color-adjust: exact; print-color-adjust: exact; } .footer { padding: 2mm 10mm; } * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
   @media screen { body { width: 190mm; margin: 10mm auto; box-shadow: 0 0 10px rgba(0,0,0,.1); padding: 10mm; } }
 </style></head>
 <body>
@@ -215,6 +217,7 @@ export function buildDocHtml({ doc, lignes, settings, devise, numero }) {
       ${ent.tel ? `<div>Tél : ${esc(ent.tel)}</div>` : ''}
       ${ent.email ? `<div>${esc(ent.email)}</div>` : ''}
       ${ent.rccm ? `<div>RCCM : ${esc(ent.rccm)}</div>` : ''}
+      ${settings.siret ? `<div>${esc(settings.siret)}</div>` : ''}
       <div class="meta">
         <div class="row"><span class="label">N° ${esc(title)} :</span><span>${esc(numero || '—')}</span></div>
         <div class="row"><span class="label">Date :</span><span>${fmtDate(doc.date || new Date())}</span></div>
@@ -257,6 +260,11 @@ export function buildDocHtml({ doc, lignes, settings, devise, numero }) {
     </div>
   </div>
 
-  <div class="footer">${esc(ent.nom)}${ent.tel ? ' · Tél : ' + esc(ent.tel) : ''}${ent.email ? ' · ' + esc(ent.email) : ''}${ent.rccm ? ' · RCCM : ' + esc(ent.rccm) : ''}</div>
+  <div class="footer">
+    ${settings.message_remerciement ? `<div style="font-weight:bold;margin-bottom:1mm;">${esc(settings.message_remerciement)}</div>` : ''}
+    ${esc(ent.nom)}${ent.tel ? ' · Tél : ' + esc(ent.tel) : ''}${ent.email ? ' · ' + esc(ent.email) : ''}${ent.rccm ? ' · RCCM : ' + esc(ent.rccm) : ''}
+    ${settings.coordonnees_bancaires ? `<div style="margin-top:1mm;">${esc(settings.coordonnees_bancaires)}</div>` : ''}
+    ${settings.mentions_legales ? `<div style="margin-top:1mm;font-style:italic;">${esc(settings.mentions_legales)}</div>` : ''}
+  </div>
 </body></html>`
 }

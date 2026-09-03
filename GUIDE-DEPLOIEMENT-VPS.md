@@ -37,10 +37,13 @@ docker compose version
 apt install -y git
 ```
 
-### 2.4 Ouvrir le port 3001 dans le pare-feu Hostinger
+### 2.4 Ouvrir les ports 80 et 443 dans le pare-feu Hostinger
 
 Dans le panel Hostinger → **VPS → Pare-feu / Security** :
-- Ajouter une règle TCP **port 3001** (ou configurer un reverse proxy Nginx sur le port 80/443, voir section 8).
+- Ajouter une règle TCP **port 80** (HTTP)
+- Ajouter une règle TCP **port 443** (HTTPS)
+
+> Le port 3001 n'a **pas besoin** d'être ouvert — Nginx fait le proxy en interne.
 
 ---
 
@@ -122,13 +125,16 @@ Vous devriez voir :
 [AGEO] ✅ Licence valide
 [AGEO] Base de données MySQL prête
 [AGEO] Application disponible sur http://localhost:3001
+[AGEO] Connexion MySQL établie
 ```
+
+Nginx est également démarré et proxy les requêtes vers l'app.
 
 ---
 
 ## 6. Tester l'accès
 
-Depuis un navigateur : `http://IP_DU_VPS:3001`
+Depuis un navigateur : `http://IP_DU_VPS` (port 80, via Nginx)
 
 - **Email** : `admin@entreprise.com`
 - **Mot de passe** : `admin1234`
@@ -137,61 +143,66 @@ Depuis un navigateur : `http://IP_DU_VPS:3001`
 
 ---
 
-## 7. Configurer le HTTPS avec Nginx (recommandé)
+## 7. Configurer le HTTPS (optionnel, recommandé)
 
-### 7.1 Installer Nginx
+Nginx est déjà inclus dans la stack Docker et sert l'app sur le port 80.
+Pour activer HTTPS :
 
-```bash
-apt install -y nginx
-```
+### 7.1 Obtenir des certificats SSL
 
-### 7.2 Créer la configuration du site
-
-```bash
-nano /etc/nginx/sites-available/ageo
-```
-
-Contenu :
-
-```nginx
-server {
-    listen 80;
-    server_name votre-domaine.com;  # ou l'IP du VPS
-
-    client_max_body_size 50M;  # Pour les uploads (photos, documents)
-
-    location / {
-        proxy_pass http://127.0.0.1:3001;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-
-### 7.3 Activer le site
+**Avec Let's Encrypt (gratuit) :**
 
 ```bash
-ln -s /etc/nginx/sites-available/ageo /etc/nginx/sites-enabled/
-nginx -t          # tester la configuration
-systemctl reload nginx
+# Installer certbot
+apt install -y certbot
+
+# Générer le certificat (arrêter temporairement Nginx pour libérer le port 80)
+docker compose stop nginx
+certbot certonly --standalone -d votre-domaine.com
+docker compose start nginx
+
+# Copier les certificats dans le dossier nginx/certs/
+cp /etc/letsencrypt/live/votre-domaine.com/fullchain.pem /opt/ageo/nginx/certs/
+cp /etc/letsencrypt/live/votre-domaine.com/privkey.pem /opt/ageo/nginx/certs/
 ```
 
-L'app est maintenant accessible sur `http://votre-domaine.com` (port 80 au lieu de 3001).
-
-### 7.4 Activer HTTPS avec Let's Encrypt
+**Ou auto-signé (pour test) :**
 
 ```bash
-apt install -y certbot python3-certbot-nginx
-certbot --nginx -d votre-domaine.com
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /opt/ageo/nginx/certs/privkey.pem -out /opt/ageo/nginx/certs/fullchain.pem \
+  -subj "/CN=localhost"
 ```
 
-Certbot configure automatiquement le HTTPS et le renouvellement du certificat.
+### 7.2 Activer le HTTPS dans la config Nginx
+
+```bash
+nano /opt/ageo/nginx/nginx.conf
+```
+
+- Décommentez le bloc `server` HTTPS (port 443) à la fin du fichier
+- Décommentez la ligne `return 301 https://...` dans le bloc HTTP pour forcer la redirection
+- Remplacez `votre-domaine.com` par votre domaine réel
+
+### 7.3 Redémarrer Nginx
+
+```bash
+docker compose restart nginx
+```
+
+L'app est maintenant accessible sur `https://votre-domaine.com`.
+
+### 7.4 Renouvellement automatique Let's Encrypt
+
+```bash
+crontab -e
+```
+
+Ajouter :
+```cron
+# Renouvellement mensuel du certificat
+0 3 1 * * certbot renew --deploy-hook "cp /etc/letsencrypt/live/votre-domaine.com/*.pem /opt/ageo/nginx/certs/ && docker compose -f /opt/ageo/docker-compose.yml restart nginx"
+```
 
 ---
 
@@ -277,9 +288,11 @@ docker compose up -d --build
 
 | Action | Commande |
 |---|---|
-| Voir les logs | `docker compose logs -f app` |
+| Voir les logs app | `docker compose logs -f app` |
 | Voir les logs MySQL | `docker compose logs -f mysql` |
+| Voir les logs Nginx | `docker compose logs -f nginx` |
 | Redémarrer l'app | `docker compose restart app` |
+| Redémarrer Nginx | `docker compose restart nginx` |
 | Arrêter tout | `docker compose down` |
 | Arrêter + supprimer données | `docker compose down -v` |
 | Statut des conteneurs | `docker compose ps` |
@@ -299,6 +312,7 @@ docker compose logs app
 Vérifier :
 - MySQL est bien démarré : `docker compose ps mysql`
 - Les variables d'environnement sont correctes dans `docker-compose.yml`
+- Le port 80 n'est pas déjà utilisé : `ss -tlnp | grep :80`
 - Le port 3001 n'est pas déjà utilisé : `ss -tlnp | grep 3001`
 
 ### Erreur de connexion MySQL
@@ -336,8 +350,8 @@ nano docker-compose.yml   # changer JWT_SECRET, mots de passe
 docker compose up -d --build
 
 # 6. Tester
-curl http://localhost:3001/api/auth/login -X POST -H "Content-Type: application/json" -d '{"email":"admin@entreprise.com","password":"admin1234"}'
+curl http://localhost/api/auth/login -X POST -H "Content-Type: application/json" -d '{"email":"admin@entreprise.com","password":"admin1234"}'
 
 # 7. Accéder
-http://IP_DU_VPS:3001
+http://IP_DU_VPS
 ```

@@ -109,8 +109,15 @@ export default function Commandes() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[220px]">
+      <div className="flex flex-wrap gap-2">
+        {TABS.map((t) => (
+          <button key={t.key} onClick={() => setTab(t.key)}
+            className={`rounded-lg px-3.5 py-2 text-sm font-semibold transition
+              ${tab === t.key ? 'bg-brand-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}>
+            {t.label} <span className="ml-1 opacity-70">{counts[t.key]}</span>
+          </button>
+        ))}
+        <div className="relative ml-auto min-w-[220px]">
           <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input className="input pl-10" placeholder="N° commande, client..." value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
@@ -124,44 +131,34 @@ export default function Commandes() {
         <StatCard label="En cours" value={stats.cours} icon={Clock} color="purple" />
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {TABS.map((t) => (
-          <button key={t.key} onClick={() => setTab(t.key)}
-            className={`rounded-lg px-3.5 py-2 text-sm font-semibold transition
-              ${tab === t.key ? 'bg-brand-700 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}>
-            {t.label} <span className="ml-1 opacity-70">{counts[t.key]}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="card overflow-hidden">
+      <div className="table-wrap">
         {loading ? <Spinner /> : filtered.length === 0 ? (
           <EmptyState icon={ShoppingCart} title="Aucune commande trouvée"
-            action={<button onClick={openNew} className="text-sm font-semibold text-brand-700">Créer la première commande</button>} />
+            action={<button onClick={openNew} className="text-sm font-semibold text-brand-600">Créer la première commande</button>} />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-50">
+              <thead>
                 <tr>
                   <th className="table-th">N° Commande</th><th className="table-th">Client</th><th className="table-th">Date</th>
                   <th className="table-th text-right">Articles</th><th className="table-th text-right">Montant HT</th>
                   <th className="table-th">Statut</th><th className="table-th"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {filtered.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-50">
-                    <td className="table-td font-semibold text-slate-900">{c.numero}</td>
-                    <td className="table-td">{c.client_nom || '—'}</td>
+                  <tr key={c.id} className="table-row-hover">
+                    <td className="table-td font-semibold text-slate-800">{c.numero}</td>
+                    <td className="table-td text-slate-600">{c.client_nom || '—'}</td>
                     <td className="table-td text-slate-500">{formatDate(c.date_commande)}</td>
-                    <td className="table-td text-right">{c.nb_articles}</td>
-                    <td className="table-td text-right font-semibold">{formatMoney(c.montant_ht, devise)}</td>
+                    <td className="table-td text-right text-slate-600">{c.nb_articles}</td>
+                    <td className="table-td text-right font-semibold text-slate-800">{formatMoney(c.montant_ht, devise)}</td>
                     <td className="table-td"><Badge status={c.statut} /></td>
                     <td className="table-td">
                       <div className="flex justify-end gap-1.5">
                         {NEXT[c.statut] && (
                           <button onClick={() => changeStatut(c, NEXT[c.statut])}
-                            className="rounded-md bg-brand-50 px-2 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100">
+                            className="rounded-md bg-brand-50 px-2 py-1 text-xs font-semibold text-brand-600 hover:bg-brand-100">
                             {NEXT[c.statut] === 'en_cours' ? 'Traiter' : 'Livrer'}
                           </button>
                         )}
@@ -198,7 +195,7 @@ export default function Commandes() {
 
           <div className="flex items-center justify-between">
             <label className="label mb-0">Articles <span className="text-red-500">*</span></label>
-            <button type="button" onClick={addLigne} className="flex items-center gap-1 text-sm font-semibold text-brand-700"><Plus size={15} /> Ajouter un article</button>
+            <button type="button" onClick={addLigne} className="flex items-center gap-1 text-sm font-semibold text-brand-600"><Plus size={15} /> Ajouter un article</button>
           </div>
 
           <div className="overflow-x-auto rounded-lg border border-slate-200">
@@ -238,7 +235,7 @@ export default function Commandes() {
           <div className="ml-auto w-full max-w-xs space-y-1 text-sm">
             <div className="flex justify-between text-slate-500"><span>Total HT</span><span>{formatMoney(totals.ht, devise)}</span></div>
             <div className="flex justify-between text-slate-500"><span>TVA</span><span>{formatMoney(totals.tva, devise)}</span></div>
-            <div className="flex justify-between border-t border-slate-200 pt-1 text-base font-bold"><span>Total TTC</span><span className="text-brand-700">{formatMoney(totals.ttc, devise)}</span></div>
+            <div className="flex justify-between border-t border-slate-200 pt-1 text-base font-bold"><span>Total TTC</span><span className="text-brand-600">{formatMoney(totals.ttc, devise)}</span></div>
           </div>
 
           <div className="flex gap-3 pt-2">

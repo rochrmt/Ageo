@@ -19,7 +19,7 @@ export default class ErrorBoundary extends Component {
       return (
         <div className="grid min-h-[60vh] place-items-center p-6">
           <div className="card max-w-md p-8 text-center">
-            <p className="mb-2 text-lg font-bold text-slate-900">Une erreur est survenue</p>
+            <p className="mb-2 text-lg font-bold text-slate-800">Une erreur est survenue</p>
             <p className="mb-4 text-sm text-slate-500">{this.state.error?.message || 'Erreur inconnue'}</p>
             <button
               type="button"

@@ -176,7 +176,7 @@ export default function Contrats({ clients = [] }) {
         <StatCard label="Total encaissé" value={formatMoney(stats.encaisse, devise)} icon={Wallet} color="green" />
       </div>
 
-      <div className="card overflow-hidden">
+      <div className="table-wrap">
         <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 px-4 py-3">
           {[
             { key: 'tous', label: 'Tous' }, { key: 'contrat', label: 'Contrats' },
@@ -184,17 +184,17 @@ export default function Contrats({ clients = [] }) {
           ].map((t) => (
             <button key={t.key} onClick={() => setFiltre(t.key)}
               className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition
-                ${filtre === t.key ? 'bg-brand-700 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>{t.label}</button>
+                ${filtre === t.key ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>{t.label}</button>
           ))}
         </div>
 
         {loading ? <Spinner /> : filtered.length === 0 ? (
           <EmptyState icon={FileSignature} title="Aucun contrat ni abonnement"
-            action={<button onClick={openNew} className="text-sm font-semibold text-brand-700">Créer le premier</button>} />
+            action={<button onClick={openNew} className="text-sm font-semibold text-brand-600">Créer le premier</button>} />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-50">
+              <thead>
                 <tr>
                   <th className="table-th">Référence</th><th className="table-th">Client</th>
                   <th className="table-th">Intitulé</th><th className="table-th">Type</th>
@@ -202,28 +202,28 @@ export default function Contrats({ clients = [] }) {
                   <th className="table-th">Prochaine échéance</th><th className="table-th">Statut</th><th className="table-th"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {filtered.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-50">
+                  <tr key={c.id} className="table-row-hover">
                     <td className="table-td text-xs text-slate-400">{c.reference}</td>
-                    <td className="table-td font-semibold text-slate-900">{c.client_nom}</td>
-                    <td className="table-td">{c.intitule}</td>
+                    <td className="table-td font-semibold text-slate-800">{c.client_nom}</td>
+                    <td className="table-td text-slate-600">{c.intitule}</td>
                     <td className="table-td">
                       <span className="inline-flex items-center gap-1 text-slate-600">
                         {c.type === 'abonnement' ? <Repeat size={14} /> : <FileSignature size={14} />}
                         {c.type === 'abonnement' ? `Abonnement · ${c.periodicite}` : 'Contrat'}
                       </span>
                     </td>
-                    <td className="table-td text-right font-semibold">{formatMoney(c.montant, devise)}</td>
-                    <td className="table-td text-right text-emerald-700">{formatMoney(c.total_paye, devise)}</td>
+                    <td className="table-td text-right font-semibold text-slate-800">{formatMoney(c.montant, devise)}</td>
+                    <td className="table-td text-right text-emerald-600">{formatMoney(c.total_paye, devise)}</td>
                     <td className="table-td"><EcheanceBadge contrat={c} /></td>
                     <td className="table-td"><span className={`badge ${STATUT_STYLES[c.statut] || ''}`}>{STATUTS.find((s) => s.key === c.statut)?.label || c.statut}</span></td>
                     <td className="table-td">
                       <div className="flex justify-end gap-1">
-                        <button onClick={() => genererFacture(c)} title="Générer une facture" className="rounded p-1.5 text-slate-400 hover:bg-brand-50 hover:text-brand-700"><FileText size={16} /></button>
+                        <button onClick={() => genererFacture(c)} title="Générer une facture" className="rounded p-1.5 text-slate-400 hover:bg-brand-50 hover:text-brand-600"><FileText size={16} /></button>
                         <button onClick={() => openPay(c)} title="Enregistrer un paiement" className="rounded p-1.5 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"><CreditCard size={16} /></button>
-                        <button onClick={() => openDetail(c)} title="Historique" className="rounded p-1.5 text-slate-400 hover:bg-brand-50 hover:text-brand-700"><History size={16} /></button>
-                        <button onClick={() => openEdit(c)} title="Modifier" className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-brand-700"><Pencil size={16} /></button>
+                        <button onClick={() => openDetail(c)} title="Historique" className="rounded p-1.5 text-slate-400 hover:bg-brand-50 hover:text-brand-600"><History size={16} /></button>
+                        <button onClick={() => openEdit(c)} title="Modifier" className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-brand-600"><Pencil size={16} /></button>
                         {canDelete && <button onClick={() => remove(c)} title="Supprimer" className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={16} /></button>}
                       </div>
                     </td>
@@ -252,7 +252,7 @@ export default function Contrats({ clients = [] }) {
                 {['contrat', 'abonnement'].map((t) => (
                   <button type="button" key={t} onClick={() => setForm({ ...form, type: t })}
                     className={`rounded-lg border px-3 py-2.5 text-sm font-semibold capitalize transition
-                      ${form.type === t ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                      ${form.type === t ? 'border-brand-500 bg-brand-50 text-brand-600' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
                     {t === 'abonnement' ? 'Abonnement' : 'Contrat'}
                   </button>
                 ))}
@@ -347,7 +347,7 @@ export default function Contrats({ clients = [] }) {
               <input className="input" value={payForm.notes} onChange={(e) => setPayForm({ ...payForm, notes: e.target.value })} />
             </div>
             {payModal.type === 'abonnement' && (
-              <p className="flex items-center gap-2 rounded-lg bg-brand-50 px-3 py-2 text-xs text-brand-700">
+              <p className="flex items-center gap-2 rounded-lg bg-brand-50 px-3 py-2 text-xs text-brand-600">
                 <CheckCircle2 size={14} /> La prochaine échéance sera automatiquement avancée ({payModal.periodicite}).
               </p>
             )}

@@ -6,18 +6,20 @@ export function Modal({ open, onClose, title, icon: Icon, children, size = 'md' 
   if (!open) return null
   const widths = { sm: 'max-w-md', md: 'max-w-xl', lg: 'max-w-3xl', xl: 'max-w-5xl' }
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/40 p-4 sm:p-8">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 sm:p-8">
       <div className={`card w-full ${widths[size]} my-4`}>
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+        <div className="flex items-center justify-between border-b px-6 py-4" style={{ borderColor: 'rgb(var(--border))' }}>
           <div className="flex items-center gap-3">
             {Icon && (
-              <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-50 text-brand-700">
+              <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-500/15 text-brand-400">
                 <Icon size={18} />
               </span>
             )}
-            <h2 className="text-lg font-bold text-slate-900">{title}</h2>
+            <h2 className="text-lg font-bold" style={{ color: 'rgb(var(--text-primary))' }}>{title}</h2>
           </div>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+          <button onClick={onClose} className="rounded-lg p-1.5" style={{ color: 'rgb(var(--text-muted))' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgb(var(--surface-2))'; e.currentTarget.style.color = 'rgb(var(--text-secondary))' }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgb(var(--text-muted))' }}>
             <X size={20} />
           </button>
         </div>
@@ -30,43 +32,45 @@ export function Modal({ open, onClose, title, icon: Icon, children, size = 'md' 
 /* ── Carte statistique ──────────────────────────────────────────────────── */
 export function StatCard({ label, value, sub, icon: Icon, color = 'brand' }) {
   const colors = {
-    brand:  'bg-brand-600 text-white',
-    green:  'bg-emerald-500 text-white',
-    orange: 'bg-amber-500 text-white',
-    purple: 'bg-violet-600 text-white',
-    slate:  'bg-slate-100 text-slate-500',
+    brand:  'bg-brand-500/15 text-brand-400',
+    green:  'bg-emerald-500/15 text-emerald-400',
+    orange: 'bg-amber-500/15 text-amber-400',
+    purple: 'bg-violet-500/15 text-violet-400',
+    slate:  '',
+    blue:   'bg-blue-500/15 text-blue-400',
+    red:    'bg-red-500/15 text-red-400',
   }
   return (
-    <div className="stat-card">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-        <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
-        {sub && <p className="mt-1 text-xs text-slate-400">{sub}</p>}
-      </div>
+    <div className="stat-card card-hover">
       {Icon && (
-        <span className={`grid h-11 w-11 place-items-center rounded-xl ${colors[color]}`}>
-          <Icon size={20} />
+        <span className={`stat-icon ${colors[color]}`}>
+          <Icon size={22} />
         </span>
       )}
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'rgb(var(--text-muted))' }}>{label}</p>
+        <p className="mt-1 text-2xl font-bold" style={{ color: 'rgb(var(--text-primary))' }}>{value}</p>
+        {sub && <div className="mt-1 text-xs" style={{ color: 'rgb(var(--text-muted))' }}>{sub}</div>}
+      </div>
     </div>
   )
 }
 
 /* ── Badge de statut ────────────────────────────────────────────────────── */
 const STATUS_STYLES = {
-  actif: 'bg-emerald-100 text-emerald-700',
-  inactif: 'bg-slate-100 text-slate-500',
-  en_attente: 'bg-amber-100 text-amber-700',
-  en_cours: 'bg-brand-100 text-brand-700',
-  livree: 'bg-emerald-100 text-emerald-700',
-  annulee: 'bg-red-100 text-red-700',
-  brouillon: 'bg-slate-100 text-slate-600',
-  emise: 'bg-brand-100 text-brand-700',
-  partielle: 'bg-amber-100 text-amber-700',
-  payee: 'bg-emerald-100 text-emerald-700',
-  paye: 'bg-emerald-100 text-emerald-700',
-  approuve: 'bg-emerald-100 text-emerald-700',
-  refuse: 'bg-red-100 text-red-700',
+  actif: 'bg-emerald-500/15 text-emerald-400',
+  inactif: '',
+  en_attente: 'bg-amber-500/15 text-amber-400',
+  en_cours: 'bg-brand-500/15 text-brand-400',
+  livree: 'bg-emerald-500/15 text-emerald-400',
+  annulee: 'bg-red-500/15 text-red-400',
+  brouillon: '',
+  emise: 'bg-brand-500/15 text-brand-400',
+  partielle: 'bg-amber-500/15 text-amber-400',
+  payee: 'bg-emerald-500/15 text-emerald-400',
+  paye: 'bg-emerald-500/15 text-emerald-400',
+  approuve: 'bg-emerald-500/15 text-emerald-400',
+  refuse: 'bg-red-500/15 text-red-400',
 }
 const STATUS_LABELS = {
   en_attente: 'En attente', en_cours: 'En cours', livree: 'Livrée', annulee: 'Annulée',
@@ -74,16 +78,16 @@ const STATUS_LABELS = {
   paye: 'Payé', approuve: 'Approuvé', refuse: 'Refusé', actif: 'Actif', inactif: 'Inactif',
 }
 export function Badge({ status, children }) {
-  const cls = STATUS_STYLES[status] || 'bg-slate-100 text-slate-600'
-  return <span className={`badge ${cls}`}>{children || STATUS_LABELS[status] || status}</span>
+  const cls = STATUS_STYLES[status] || ''
+  return <span className={`badge ${cls}`} style={!cls ? { background: 'rgb(var(--surface-2))', color: 'rgb(var(--text-secondary))' } : undefined}>{children || STATUS_LABELS[status] || status}</span>
 }
 
 /* ── État vide ──────────────────────────────────────────────────────────── */
 export function EmptyState({ icon: Icon, title, action }) {
   return (
     <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
-      {Icon && <Icon size={44} className="text-slate-300" />}
-      <p className="text-slate-500">{title}</p>
+      {Icon && <Icon size={44} style={{ color: 'rgb(var(--text-muted))' }} />}
+      <p style={{ color: 'rgb(var(--text-secondary))' }}>{title}</p>
       {action}
     </div>
   )
@@ -92,7 +96,7 @@ export function EmptyState({ icon: Icon, title, action }) {
 /* ── Spinner ────────────────────────────────────────────────────────────── */
 export function Spinner({ label = 'Chargement...' }) {
   return (
-    <div className="flex items-center justify-center gap-2 py-16 text-slate-400">
+    <div className="flex items-center justify-center gap-2 py-16" style={{ color: 'rgb(var(--text-muted))' }}>
       <Loader2 className="animate-spin" size={20} />
       <span className="text-sm">{label}</span>
     </div>
@@ -115,9 +119,9 @@ export function ToastProvider({ children }) {
   }
   const icons = { success: CheckCircle2, error: AlertTriangle, info: Info }
   const styles = {
-    success: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-    error: 'border-red-200 bg-red-50 text-red-800',
-    info: 'border-brand-200 bg-brand-50 text-brand-800',
+    success: 'border-emerald-500/30 bg-emerald-500/15 text-emerald-400',
+    error: 'border-red-500/30 bg-red-500/15 text-red-400',
+    info: 'border-brand-500/30 bg-brand-500/15 text-brand-400',
   }
   return (
     <ToastContext.Provider value={toast}>
