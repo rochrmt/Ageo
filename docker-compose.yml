@@ -2,7 +2,7 @@
 #  AGEO — Stack Docker (app + MySQL) avec Traefik
 #  Prérequis : Traefik doit tourner sur /opt/traefik/
 #  Usage : docker compose up -d --build
-#  Accès : https://ageo.votre-domaine.com (SSL automatique)
+#  Accès : https://global-it.mbila.pro (SSL automatique)
 # ============================================================
 
 services:
@@ -54,7 +54,7 @@ services:
     labels:
       - "traefik.enable=true"
       # Router : domaine de l'app
-      - "traefik.http.routers.ageo.rule=Host(`ageo.votre-domaine.com`)"
+      - "traefik.http.routers.ageo.rule=Host(`global-it.mbila.pro`)"
       - "traefik.http.routers.ageo.entrypoints=websecure"
       - "traefik.http.routers.ageo.tls.certresolver=letsencrypt"
       # Service : port interne de l'app
