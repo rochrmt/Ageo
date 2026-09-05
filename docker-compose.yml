@@ -1,7 +1,8 @@
 # ============================================================
-#  AGEO — Stack Docker complète (app + MySQL + Nginx)
+#  AGEO — Stack Docker (app + MySQL) avec Traefik
+#  Prérequis : Traefik doit tourner sur /opt/traefik/
 #  Usage : docker compose up -d --build
-#  Accès : http://IP_DU_VPS (port 80) ou https://votre-domaine.com
+#  Accès : https://ageo.votre-domaine.com (SSL automatique)
 # ============================================================
 
 services:
@@ -14,8 +15,6 @@ services:
       MYSQL_DATABASE: ageo
     volumes:
       - ageo-mysql-data:/var/lib/mysql
-    # Pas de ports exposés — MySQL est accessible uniquement
-    # via le réseau interne Docker (nom du service: mysql)
     expose:
       - "3306"
     healthcheck:
@@ -49,23 +48,25 @@ services:
     expose:
       - "3001"
     restart: unless-stopped
-
-  # ── Reverse proxy Nginx ───────────────────────────────────────────────────
-  nginx:
-    image: nginx:alpine
-    container_name: ageo-nginx
-    depends_on:
-      - app
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/certs:/etc/nginx/certs:ro
-      - ageo-nginx-logs:/var/log/nginx
-    restart: unless-stopped
+    networks:
+      - default
+      - traefik-proxy
+    labels:
+      - "traefik.enable=true"
+      # Router : domaine de l'app
+      - "traefik.http.routers.ageo.rule=Host(`ageo.votre-domaine.com`)"
+      - "traefik.http.routers.ageo.entrypoints=websecure"
+      - "traefik.http.routers.ageo.tls.certresolver=letsencrypt"
+      # Service : port interne de l'app
+      - "traefik.http.services.ageo.loadbalancer.server.port=3001"
+      # Middlewares : gzip + sécurité
+      - "traefik.http.routers.ageo.middlewares=gzip@file,security-headers@file"
 
 volumes:
   ageo-mysql-data:
   ageo-uploads:
-  ageo-nginx-logs:
+
+networks:
+  traefik-proxy:
+    name: traefik-proxy
+    external: true

@@ -40,14 +40,66 @@ apt install -y git
 ### 2.4 Ouvrir les ports 80 et 443 dans le pare-feu Hostinger
 
 Dans le panel Hostinger → **VPS → Pare-feu / Security** :
+
 - Ajouter une règle TCP **port 80** (HTTP)
 - Ajouter une règle TCP **port 443** (HTTPS)
 
-> Le port 3001 n'a **pas besoin** d'être ouvert — Nginx fait le proxy en interne.
+> Le port 3001 n'a **pas besoin** d'être ouvert — Traefik fait le proxy en interne.
+>
+> ⚠️ **Important** : Vous devez avoir un **nom de domaine** pointant vers l'IP de votre VPS (enregistrement A dans votre gestionnaire DNS). Traefik génère automatiquement les certificats SSL via Let's Encrypt.
 
 ---
 
-## 3. Transférer le projet sur le VPS
+## 3. Installer Traefik (reverse proxy global)
+
+Traefik gère le HTTPS automatiquement (Let's Encrypt) et permet d'héberger plusieurs applications sur le même VPS.
+
+### 3.1 Créer le réseau Docker
+
+```bash
+docker network create traefik-proxy
+```
+
+### 3.2 Cloner et configurer Traefik
+
+```bash
+mkdir -p /opt/traefik/dynamic
+mkdir -p /opt/traefik/letsencrypt
+cd /opt/traefik
+```
+
+Copier les fichiers depuis le projet :
+```bash
+cp /opt/ageo/traefik/docker-compose.yml /opt/traefik/docker-compose.yml
+cp /opt/ageo/traefik/dynamic/dynamic.yml /opt/traefik/dynamic/dynamic.yml
+```
+
+Éditer la configuration :
+```bash
+nano /opt/traefik/docker-compose.yml
+```
+
+Changer :
+- `votre@email.com` → votre vrai email (pour Let's Encrypt)
+- `traefik.votre-domaine.com` → sous-domaine pour le dashboard Traefik
+
+### 3.3 Démarrer Traefik
+
+```bash
+cd /opt/traefik
+docker compose up -d
+```
+
+Vérifier :
+```bash
+docker compose logs -f traefik
+```
+
+Le dashboard Traefik est accessible sur `http://IP_DU_VPS:8080` (temporaire, avant SSL).
+
+---
+
+## 4. Transférer le projet sur le VPS
 
 ### Option A : Git (recommandé)
 
@@ -68,7 +120,7 @@ scp -r "C:\Users\RMT\OneDrive\Desktop\AGEO" root@IP_DU_VPS:/opt/ageo
 
 ---
 
-## 4. Configurer les variables d'environnement
+## 5. Configurer les variables d'environnement
 
 Éditer le fichier `docker-compose.yml` sur le VPS :
 
@@ -76,29 +128,38 @@ scp -r "C:\Users\RMT\OneDrive\Desktop\AGEO" root@IP_DU_VPS:/opt/ageo
 nano /opt/ageo/docker-compose.yml
 ```
 
-Changer les valeurs suivantes dans la section `app.environment` :
+**1. Changer le domaine** dans les labels Traefik (section `app.labels`) :
 
-| Variable | Valeur | Description |
-|---|---|---|
-| `JWT_SECRET` | Une chaîne aléatoire longue | Clé de signature des tokens JWT |
-| `LICENCE_SECRET` | Votre secret de licence | Déjà défini, conservez-le |
-| `LICENCE_KEY` | Votre clé de licence | Laissez vide pour le mode interne |
-| `DB_PASSWORD` | Mot de passe MySQL fort | Doit correspondre à `MYSQL_ROOT_PASSWORD` |
+```
+traefik.http.routers.ageo.rule=Host(`ageo.votre-domaine.com`)
+```
+
+Remplacez `ageo.votre-domaine.com` par votre sous-domaine réel.
+
+**2. Changer les variables** dans la section `app.environment` :
+
+| Variable           | Valeur                        | Description                                  |
+| ------------------ | ----------------------------- | -------------------------------------------- |
+| `JWT_SECRET`     | Une chaîne aléatoire longue | Clé de signature des tokens JWT             |
+| `LICENCE_SECRET` | Votre secret de licence       | Déjà défini, conservez-le                 |
+| `LICENCE_KEY`    | Votre clé de licence         | Laissez vide pour le mode interne            |
+| `DB_PASSWORD`    | Mot de passe MySQL fort       | Doit correspondre à `MYSQL_ROOT_PASSWORD` |
 
 Changer également dans la section `mysql.environment` :
 
-| Variable | Valeur |
-|---|---|
+| Variable                | Valeur                                    |
+| ----------------------- | ----------------------------------------- |
 | `MYSQL_ROOT_PASSWORD` | Le même mot de passe que `DB_PASSWORD` |
 
 > **Important** : Générez un `JWT_SECRET` aléatoire :
+>
 > ```bash
 > openssl rand -hex 32
 > ```
 
 ---
 
-## 5. Construire et démarrer l'application
+## 6. Construire et démarrer l'application
 
 ```bash
 cd /opt/ageo
@@ -106,6 +167,7 @@ docker compose up -d --build
 ```
 
 Cette commande :
+
 1. Compile le frontend React (Vite build)
 2. Installe les dépendances backend (npm ci)
 3. Démarre MySQL + l'application Node.js
@@ -121,6 +183,7 @@ docker compose ps
 ```
 
 Vous devriez voir :
+
 ```
 [AGEO] ✅ Licence valide
 [AGEO] Base de données MySQL prête
@@ -128,13 +191,13 @@ Vous devriez voir :
 [AGEO] Connexion MySQL établie
 ```
 
-Nginx est également démarré et proxy les requêtes vers l'app.
+Traefik route automatiquement le trafic vers l'app et génère le certificat SSL.
 
 ---
 
-## 6. Tester l'accès
+## 7. Tester l'accès
 
-Depuis un navigateur : `http://IP_DU_VPS` (port 80, via Nginx)
+Depuis un navigateur : `https://ageo.votre-domaine.com` (SSL automatique via Traefik)
 
 - **Email** : `admin@entreprise.com`
 - **Mot de passe** : `admin1234`
@@ -143,72 +206,54 @@ Depuis un navigateur : `http://IP_DU_VPS` (port 80, via Nginx)
 
 ---
 
-## 7. Configurer le HTTPS (optionnel, recommandé)
+## 8. HTTPS — déjà géré par Traefik
 
-Nginx est déjà inclus dans la stack Docker et sert l'app sur le port 80.
-Pour activer HTTPS :
+Traefik génère et renouvelle automatiquement les certificats SSL via Let's Encrypt. **Aucune configuration manuelle nécessaire.**
 
-### 7.1 Obtenir des certificats SSL
+- HTTP → HTTPS : redirection automatique
+- Certificats : générés à la première requête
+- Renouvellement : automatique (avant expiration)
 
-**Avec Let's Encrypt (gratuit) :**
-
-```bash
-# Installer certbot
-apt install -y certbot
-
-# Générer le certificat (arrêter temporairement Nginx pour libérer le port 80)
-docker compose stop nginx
-certbot certonly --standalone -d votre-domaine.com
-docker compose start nginx
-
-# Copier les certificats dans le dossier nginx/certs/
-cp /etc/letsencrypt/live/votre-domaine.com/fullchain.pem /opt/ageo/nginx/certs/
-cp /etc/letsencrypt/live/votre-domaine.com/privkey.pem /opt/ageo/nginx/certs/
-```
-
-**Ou auto-signé (pour test) :**
-
-```bash
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout /opt/ageo/nginx/certs/privkey.pem -out /opt/ageo/nginx/certs/fullchain.pem \
-  -subj "/CN=localhost"
-```
-
-### 7.2 Activer le HTTPS dans la config Nginx
-
-```bash
-nano /opt/ageo/nginx/nginx.conf
-```
-
-- Décommentez le bloc `server` HTTPS (port 443) à la fin du fichier
-- Décommentez la ligne `return 301 https://...` dans le bloc HTTP pour forcer la redirection
-- Remplacez `votre-domaine.com` par votre domaine réel
-
-### 7.3 Redémarrer Nginx
-
-```bash
-docker compose restart nginx
-```
-
-L'app est maintenant accessible sur `https://votre-domaine.com`.
-
-### 7.4 Renouvellement automatique Let's Encrypt
-
-```bash
-crontab -e
-```
-
-Ajouter :
-```cron
-# Renouvellement mensuel du certificat
-0 3 1 * * certbot renew --deploy-hook "cp /etc/letsencrypt/live/votre-domaine.com/*.pem /opt/ageo/nginx/certs/ && docker compose -f /opt/ageo/docker-compose.yml restart nginx"
-```
+> Si vous voulez tester sans domaine (SSL auto-signé), décommentez la ligne `acme.caserver` (staging) dans `/opt/traefik/docker-compose.yml`.
 
 ---
 
-## 8. Sécuriser l'installation
+## 9. Ajouter un autre projet sur le même VPS
 
-### 8.1 Pare-feu UFW
+Pour héberger une autre application Docker :
+
+1. Créer un `docker-compose.yml` pour le nouveau projet
+2. Le connecter au réseau `traefik-proxy`
+3. Ajouter les labels Traefik avec un autre sous-domaine
+
+Exemple :
+```yaml
+services:
+  app2:
+    build: .
+    networks:
+      - default
+      - traefik-proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app2.rule=Host(`app2.votre-domaine.com`)"
+      - "traefik.http.routers.app2.entrypoints=websecure"
+      - "traefik.http.routers.app2.tls.certresolver=letsencrypt"
+      - "traefik.http.services.app2.loadbalancer.server.port=3000"
+
+networks:
+  traefik-proxy:
+    name: traefik-proxy
+    external: true
+```
+
+Démarrer : `docker compose up -d` — Traefik détecte automatiquement le nouveau conteneur et génère le SSL.
+
+---
+
+## 10. Sécuriser l'installation
+
+### 10.1 Pare-feu UFW
 
 ```bash
 ufw allow 22/tcp      # SSH
@@ -219,7 +264,7 @@ ufw enable
 
 > Ne **pas** ouvrir le port 3306 (MySQL) publiquement.
 
-### 8.2 Désactiver la connexion SSH par mot de passe (recommandé)
+### 10.2 Désactiver la connexion SSH par mot de passe (recommandé)
 
 ```bash
 # D'abord ajouter votre clé publique SSH
@@ -229,7 +274,7 @@ nano /etc/ssh/sshd_config
 systemctl restart sshd
 ```
 
-### 8.3 Changer le mot de passe MySQL
+### 10.3 Changer le mot de passe MySQL
 
 Si vous voulez changer le mot de passe MySQL après installation :
 
@@ -241,9 +286,9 @@ docker compose up -d
 
 ---
 
-## 9. Sauvegardes automatiques
+## 11. Sauvegardes automatiques
 
-### 9.1 Sauvegarde manuelle
+### 11.1 Sauvegarde manuelle
 
 ```bash
 # Exporter la base de données
@@ -253,7 +298,7 @@ docker exec ageo-mysql mysqldump -u root -pVOTRE_MDP ageo > /opt/backups/ageo_$(
 tar -czf /opt/backups/uploads_$(date +%Y-%m-%d).tar.gz /opt/ageo/server/uploads/
 ```
 
-### 9.2 Sauvegarde automatique (cron)
+### 11.2 Sauvegarde automatique (cron)
 
 ```bash
 crontab -e
@@ -268,7 +313,7 @@ Ajouter :
 
 ---
 
-## 10. Mise à jour de l'application
+## 12. Mise à jour de l'application
 
 ```bash
 cd /opt/ageo
@@ -284,24 +329,24 @@ docker compose up -d --build
 
 ---
 
-## 11. Commandes utiles
+## 13. Commandes utiles
 
-| Action | Commande |
-|---|---|
-| Voir les logs app | `docker compose logs -f app` |
-| Voir les logs MySQL | `docker compose logs -f mysql` |
-| Voir les logs Nginx | `docker compose logs -f nginx` |
-| Redémarrer l'app | `docker compose restart app` |
-| Redémarrer Nginx | `docker compose restart nginx` |
-| Arrêter tout | `docker compose down` |
-| Arrêter + supprimer données | `docker compose down -v` |
-| Statut des conteneurs | `docker compose ps` |
-| Accéder au shell du conteneur app | `docker exec -it ageo-app sh` |
-| Accéder à MySQL | `docker exec -it ageo-mysql mysql -u root -pVOTRE_MDP ageo` |
+| Action                             | Commande                                                      |
+| ---------------------------------- | ------------------------------------------------------------- |
+| Voir les logs app                  | `docker compose logs -f app`                                |
+| Voir les logs MySQL                | `docker compose logs -f mysql`                              |
+| Voir les logs Traefik              | `cd /opt/traefik && docker compose logs -f traefik`        |
+| Redémarrer l'app                  | `docker compose restart app`                                |
+| Redémarrer Traefik                | `cd /opt/traefik && docker compose restart traefik`        |
+| Arrêter tout                      | `docker compose down`                                       |
+| Arrêter + supprimer données      | `docker compose down -v`                                    |
+| Statut des conteneurs              | `docker compose ps`                                         |
+| Accéder au shell du conteneur app | `docker exec -it ageo-app sh`                               |
+| Accéder à MySQL                  | `docker exec -it ageo-mysql mysql -u root -pVOTRE_MDP ageo` |
 
 ---
 
-## 12. En cas de problème
+## 14. En cas de problème
 
 ### L'app ne démarre pas
 
@@ -310,10 +355,13 @@ docker compose logs app
 ```
 
 Vérifier :
+
 - MySQL est bien démarré : `docker compose ps mysql`
 - Les variables d'environnement sont correctes dans `docker-compose.yml`
 - Le port 80 n'est pas déjà utilisé : `ss -tlnp | grep :80`
-- Le port 3001 n'est pas déjà utilisé : `ss -tlnp | grep 3001`
+- Le port 443 n'est pas déjà utilisé : `ss -tlnp | grep :443`
+- Traefik est bien démarré : `cd /opt/traefik && docker compose ps`
+- Le domaine pointe bien vers le VPS : `dig ageo.votre-domaine.com`
 
 ### Erreur de connexion MySQL
 
@@ -343,15 +391,21 @@ curl -fsSL https://get.docker.com | sh
 # 3. Projet
 cd /opt && git clone VOTRE_REPO ageo && cd ageo
 
-# 4. Configurer
-nano docker-compose.yml   # changer JWT_SECRET, mots de passe
+# 4. Traefik (reverse proxy + SSL auto)
+docker network create traefik-proxy
+mkdir -p /opt/traefik/{dynamic,letsencrypt}
+cp traefik/docker-compose.yml /opt/traefik/
+cp traefik/dynamic/dynamic.yml /opt/traefik/dynamic/
+nano /opt/traefik/docker-compose.yml   # email + domaine
+cd /opt/traefik && docker compose up -d
 
-# 5. Démarrer
+# 5. Configurer AGEO
+cd /opt/ageo
+nano docker-compose.yml   # domaine + JWT_SECRET + mots de passe
+
+# 6. Démarrer
 docker compose up -d --build
 
-# 6. Tester
-curl http://localhost/api/auth/login -X POST -H "Content-Type: application/json" -d '{"email":"admin@entreprise.com","password":"admin1234"}'
-
 # 7. Accéder
-http://IP_DU_VPS
+https://ageo.votre-domaine.com
 ```
