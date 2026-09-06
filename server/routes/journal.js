@@ -9,20 +9,20 @@ router.get('/', async (req, res) => {
   const { module, action, q } = req.query
   const limit = Math.min(parseInt(req.query.limit, 10) || 100, 500)
 
-  const where = []
+  const where = ['j.utilisateur_id NOT IN (SELECT id FROM users WHERE is_original = 1)']
   const params = []
-  if (module) { where.push('module = ?'); params.push(module) }
-  if (action) { where.push('action = ?'); params.push(action) }
+  if (module) { where.push('j.module = ?'); params.push(module) }
+  if (action) { where.push('j.action = ?'); params.push(action) }
   if (q) {
-    where.push('(description LIKE ? OR utilisateur_nom LIKE ?)')
+    where.push('(j.description LIKE ? OR j.utilisateur_nom LIKE ?)')
     params.push(`%${q}%`, `%${q}%`)
   }
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : ''
 
   try {
     const rows = await db.getAll(
-      `SELECT * FROM journal_activites ${whereSql}
-        ORDER BY date_action DESC, id DESC
+      `SELECT j.* FROM journal_activites j ${whereSql}
+        ORDER BY j.date_action DESC, j.id DESC
         LIMIT ${limit}`,
       params,
     )
@@ -31,13 +31,17 @@ router.get('/', async (req, res) => {
     const stats = await db.getOne(
       `SELECT
          (SELECT COUNT(*) FROM journal_activites
-           WHERE DATE(date_action) = CURDATE()) AS aujourdhui,
+           WHERE DATE(date_action) = CURDATE()
+             AND utilisateur_id NOT IN (SELECT id FROM users WHERE is_original = 1)) AS aujourdhui,
          (SELECT COUNT(*) FROM journal_activites
-           WHERE date_action >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND module = 'Authentification') AS auth_7j,
+           WHERE date_action >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND module = 'Authentification'
+             AND utilisateur_id NOT IN (SELECT id FROM users WHERE is_original = 1)) AS auth_7j,
          (SELECT COUNT(*) FROM journal_activites
-           WHERE date_action >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND module = 'Clients') AS clients_7j,
+           WHERE date_action >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND module = 'Clients'
+             AND utilisateur_id NOT IN (SELECT id FROM users WHERE is_original = 1)) AS clients_7j,
          (SELECT COUNT(*) FROM journal_activites
-           WHERE date_action >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND module = 'Personnel') AS personnel_7j`,
+           WHERE date_action >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND module = 'Personnel'
+             AND utilisateur_id NOT IN (SELECT id FROM users WHERE is_original = 1)) AS personnel_7j`,
     )
 
     // Modules distincts pour les filtres
