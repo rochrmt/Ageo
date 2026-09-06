@@ -1,7 +1,7 @@
 # ============================================================
 #  AGEO — Stack Docker (app + MySQL) avec Traefik
 #  Prérequis : Traefik doit tourner sur /opt/traefik/
-#  Usage : copier .env.example → .env, puis docker compose up -d --build
+#  Usage : cp .env.example .env && nano .env, puis docker compose up -d --build
 #  Accès : https://${DOMAIN} (SSL automatique)
 # ============================================================
 
