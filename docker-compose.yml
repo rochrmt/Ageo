@@ -42,7 +42,6 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES: 10h
       LICENCE_SECRET: ${LICENCE_SECRET}
-      LICENCE_KEY: ${LICENCE_KEY}
     volumes:
       - ${CONTAINER_PREFIX}-uploads:/app/server/uploads
     expose:
