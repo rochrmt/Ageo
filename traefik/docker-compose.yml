@@ -2,7 +2,7 @@
 #  Traefik — Reverse proxy global (multi-apps + SSL auto)
 #  Emplacement : /opt/traefik/docker-compose.yml
 #  Démarrage  : docker compose up -d
-#  Dashboard  : https://${TRAEFIK_DOMAIN} (protégé)
+#  Dashboard  : https://traefik.mbila.pro (protégé)
 # ============================================================
 
 services:
@@ -12,8 +12,6 @@ services:
     restart: unless-stopped
     environment:
       - DOCKER_API_VERSION=1.41
-      - TRAEFIK_DOMAIN=${TRAEFIK_DOMAIN}
-      - ACME_EMAIL=${ACME_EMAIL}
     security_opt:
       - no-new-privileges:true
     networks:
@@ -47,7 +45,7 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
       # ── Staging (pour test — décommenter pour éviter le rate limit) ──────
       # - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.email=rochrmt@gmail.com"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
 
       # ── Dashboard ────────────────────────────────────────────────────────
@@ -60,7 +58,7 @@ services:
     labels:
       - "traefik.enable=true"
       # Dashboard accessible sur traefik.mbila.pro
-      - "traefik.http.routers.dashboard.rule=Host(`${TRAEFIK_DOMAIN}`)"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.mbila.pro`)"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"

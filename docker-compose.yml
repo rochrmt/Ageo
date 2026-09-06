@@ -1,20 +1,20 @@
 # ============================================================
 #  AGEO — Stack Docker (app + MySQL) avec Traefik
 #  Prérequis : Traefik doit tourner sur /opt/traefik/
-#  Usage : cp .env.example .env && nano .env, puis docker compose up -d --build
-#  Accès : https://${DOMAIN} (SSL automatique)
+#  Usage : docker compose up -d --build
+#  Accès : https://global-it.mbila.pro (SSL automatique)
 # ============================================================
 
 services:
   # ── Base de données MySQL (interne, non exposée) ────────────────────────
   mysql:
     image: mysql:8.0
-    container_name: ${CONTAINER_PREFIX}-mysql
+    container_name: ageo-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_ROOT_PASSWORD: Ageo@2026!
+      MYSQL_DATABASE: ageo
     volumes:
-      - ${CONTAINER_PREFIX}-mysql-data:/var/lib/mysql
+      - ageo-mysql-data:/var/lib/mysql
     expose:
       - "3306"
     healthcheck:
@@ -28,7 +28,7 @@ services:
   # ── Application (backend + frontend) ─────────────────────────────────────
   app:
     build: .
-    container_name: ${CONTAINER_PREFIX}-app
+    container_name: ageo-app
     depends_on:
       mysql:
         condition: service_healthy
@@ -36,15 +36,15 @@ services:
       PORT: "3001"
       DB_SERVER: mysql
       DB_PORT: "3306"
-      DB_NAME: ${DB_NAME}
+      DB_NAME: ageo
       DB_USER: root
-      DB_PASSWORD: ${DB_ROOT_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
+      DB_PASSWORD: Ageo@2026!
+      JWT_SECRET: d874f3bb86debb314eb424af233d01669f041233b416477d560c4132092580af3c87be9e3007a828d413b0b8ad31e18c
       JWT_EXPIRES: 10h
-      LICENCE_SECRET: ${LICENCE_SECRET}
-      LICENCE_KEY: ${LICENCE_KEY}
+      LICENCE_SECRET: 12fffd0329f96cf89632f961f0f24c8269552b2f6405ce5f3ba560b74f2bca5d16f8231e3ddc97ce97d215a7be976def
+      LICENCE_KEY: "eyJlbnRyZXByaXNlIjoiTW9uIEVudHJlcHJpc2UiLCJleHBpcmF0aW9uIjoiMjAyNy0xMi0zMSIsIm1heF91c2VycyI6bnVsbCwibW9kdWxlcyI6WyJhbGwiXSwiaXNzdWVkX2F0IjoiMjAyNi0wOC0wNyJ9.9079b0ac2f4ba4b08af728cd9f81ef19895dbffcbca7f283efb371fd5f277f26"
     volumes:
-      - ${CONTAINER_PREFIX}-uploads:/app/server/uploads
+      - ageo-uploads:/app/server/uploads
     expose:
       - "3001"
     restart: unless-stopped
@@ -54,7 +54,7 @@ services:
     labels:
       - "traefik.enable=true"
       # Router : domaine de l'app
-      - "traefik.http.routers.ageo.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.ageo.rule=Host(`global-it.mbila.pro`)"
       - "traefik.http.routers.ageo.entrypoints=websecure"
       - "traefik.http.routers.ageo.tls.certresolver=letsencrypt"
       # Service : port interne de l'app
@@ -63,8 +63,8 @@ services:
       - "traefik.http.routers.ageo.middlewares=gzip@file,security-headers@file"
 
 volumes:
-  ${CONTAINER_PREFIX}-mysql-data:
-  ${CONTAINER_PREFIX}-uploads:
+  ageo-mysql-data:
+  ageo-uploads:
 
 networks:
   traefik-proxy:
