@@ -5,7 +5,7 @@
 export const DOC_TYPES = [
   { key: 'bon_livraison',      label: 'Bon de livraison',   title: 'Bon de livraison' },
   { key: 'facture_proforma',   label: 'Facture proforma',   title: 'Facture proforma' },
-  { key: 'facture_definitive', label: 'Facture définitive', title: 'Facture' },
+  { key: 'facture_definitive', label: 'Facture définitive', title: 'Facture définitive' },
 ]
 
 export function docTitle(type) {

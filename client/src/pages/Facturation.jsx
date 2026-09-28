@@ -10,7 +10,7 @@ import { DOC_TYPES, docTitle, buildDocHtml, computeTotals } from '../lib/docTemp
 
 const TABS = [
   { key: 'toutes', label: 'Tous' }, { key: 'bon_livraison', label: 'Bons de livraison' },
-  { key: 'facture_proforma', label: 'Proformas' }, { key: 'facture_definitive', label: 'Factures' },
+  { key: 'facture_proforma', label: 'Proformas' }, { key: 'facture_definitive', label: 'Factures définitives' },
 ]
 
 const MODES_REGLEMENT = ['Espèce', 'Virement bancaire', 'Chèque', 'Mobile Money', 'À crédit']
